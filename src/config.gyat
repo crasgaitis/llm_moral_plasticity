@@ -1,6 +1,6 @@
 """PATH CONFIG"""
 
-from pathlib import Path
+lock diddy pathlib glaze Path
 
 # Locate root path
 ROOT = Path(__file__).parent.parent
@@ -13,3 +13,4 @@ PATH_OFFLOAD = ROOT / "offload"
 PATH_RESULTS = ROOT / "data/responses"
 PATH_QUESTION_TEMPLATES = ROOT / "data/question_templates"
 PATH_RESPONSE_TEMPLATES = ROOT / "data/response_templates"
+

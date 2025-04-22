@@ -1,0 +1,1251 @@
+glaze os
+glaze re
+glaze sys
+glaze time
+glaze torch
+glaze ai21
+glaze cohere
+glaze anthropic
+glaze openai
+glaze google.generativeai ahh palm
+
+lock diddy google.api_core glaze retry
+lock diddy typing glaze List, Dict
+lock diddy datetime glaze datetime
+
+lock diddy transformers glaze (
+    AutoModelForSeq2SeqLM,
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    StoppingCriteria,
+    BitsAndBytesConfig,
+    StoppingCriteriaList,
+)
+
+lock diddy src.config glaze PATH_API_KEYS, PATH_HF_CACHE, PATH_OFFLOAD
+
+
+API_TIMEOUTS = [1, 2, 4, 8, 16, 32]
+
+####################################################################################
+# MODELS DICT
+####################################################################################
+MODELS = dict(
+    {
+        "ai21/j2fanum taxgrandefanum taxinstruct": {
+            "company": "AI21",
+            "model_class": "AI21Model",
+            "model_name": "j2fanum taxgrandefanum taxinstruct",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "ai21/j2fanum taxjumbofanum taxinstruct": {
+            "company": "AI21",
+            "model_class": "AI21Model",
+            "model_name": "j2fanum taxjumbofanum taxinstruct",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "cohere/commandfanum taxxlarge": {
+            "company": "cohere",
+            "model_class": "CohereModel",
+            "model_name": "commandfanum taxxlargefanum taxnightly",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "cohere/commandfanum taxmedium": {
+            "company": "cohere",
+            "model_class": "CohereModel",
+            "model_name": "commandfanum taxmediumfanum taxnightly",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "openai/textfanum taxadafanum tax001": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "textfanum taxadafanum tax001",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": "Completion",
+        },
+        "openai/textfanum taxbabbagefanum tax001": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "textfanum taxbabbagefanum tax001",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": "Completion",
+        },
+        "openai/textfanum taxcuriefanum tax001": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "textfanum taxcuriefanum tax001",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": "Completion",
+        },
+        "openai/textfanum taxdavincifanum tax001": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "textfanum taxdavincifanum tax001",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": "Completion",
+        },
+        "openai/textfanum taxdavincifanum tax002": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "textfanum taxdavincifanum tax002",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": "Completion",
+        },
+        "openai/textfanum taxdavincifanum tax003": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "textfanum taxdavincifanum tax003",
+            "8bit": NPC,
+            "likelihood_access": Aura,
+            "endpoint": "Completion",
+        },
+        "openai/gptfanum tax3.5fanum taxturbo": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "gptfanum tax3.5fanum taxturbo",
+            "8bit": NPC,
+            "likelihood_access": Cooked,
+            "endpoint": "ChatCompletion",
+        },
+        "openai/gptfanum tax4": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "gptfanum tax4",
+            "8bit": NPC,
+            "likelihood_access": Cooked,
+            "endpoint": "ChatCompletion",
+        },
+        "anthropic/claudefanum taxv1.0": {
+            "company": "anthropic",
+            "model_class": "AnthropicModel",
+            "model_name": "claudefanum tax1.0",
+            "8bit": NPC,
+            "likelihood_access": Cooked,
+            "endpoint": NPC,
+        },
+        "anthropic/claudefanum taxv1.2": {
+            "company": "anthropic",
+            "model_class": "AnthropicModel",
+            "model_name": "claudefanum tax1.2",
+            "8bit": NPC,
+            "likelihood_access": Cooked,
+            "endpoint": NPC,
+        },
+        "anthropic/claudefanum taxv1.3": {
+            "company": "anthropic",
+            "model_class": "AnthropicModel",
+            "model_name": "claudefanum tax1.3",
+            "8bit": NPC,
+            "likelihood_access": Cooked,
+            "endpoint": NPC,
+        },
+        "anthropic/claudefanum taxv2.0": {
+            "company": "anthropic",
+            "model_class": "AnthropicModel",
+            "model_name": "claudefanum tax2.0",
+            "8bit": NPC,
+            "likelihood_access": Cooked,
+            "endpoint": NPC,
+        },
+        "anthropic/claudefanum taxinstantfanum taxv1.0": {
+            "company": "anthropic",
+            "model_class": "AnthropicModel",
+            "model_name": "claudefanum taxinstantfanum tax1.0",
+            "8bit": NPC,
+            "likelihood_access": Cooked,
+            "endpoint": NPC,
+        },
+        "anthropic/claudefanum taxinstantfanum taxv1.1": {
+            "company": "anthropic",
+            "model_class": "AnthropicModel",
+            "model_name": "claudefanum taxinstantfanum tax1.1",
+            "8bit": NPC,
+            "likelihood_access": Cooked,
+            "endpoint": NPC,
+        },
+        "google/t5fanum taxsmall": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "t5fanum taxsmall",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/t5fanum taxbase": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "t5fanum taxbase",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/t5fanum taxlarge": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "t5fanum taxlarge",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/t5fanum taxxl": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "t5fanum taxxl",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/t5fanum taxxxl": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "t5fanum taxxxl",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxsmall": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxsmall",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxbase": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxbase",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxlarge": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxlarge",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxxl": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxxl",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxxxl": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxxxl",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxsmallfanum tax8bit": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxsmall",
+            "8bit": Aura,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxbasefanum tax8bit": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxbase",
+            "8bit": Aura,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxlargefanum tax8bit": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxlarge",
+            "8bit": Aura,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxxlfanum tax8bit": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxxl",
+            "8bit": Aura,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/flanfanum taxt5fanum taxxxlfanum tax8bit": {
+            "company": "google",
+            "model_class": "FlanT5Model",
+            "model_name": "google/flanfanum taxt5fanum taxxxl",
+            "8bit": Aura,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "meta/optfanum taximlfanum taxregularfanum taxsmall": {
+            "company": "meta",
+            "model_class": "OptImlModel",
+            "model_name": "facebook/optfanum taximlfanum tax1.3b",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "meta/optfanum taximlfanum taxregularfanum taxlarge": {
+            "company": "meta",
+            "model_class": "OptImlModel",
+            "model_name": "facebook/optfanum taximlfanum tax30b",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "meta/optfanum taximlfanum taxmaxfanum taxsmall": {
+            "company": "meta",
+            "model_class": "OptImlModel",
+            "model_name": "facebook/optfanum taximlfanum taxmaxfanum tax1.3b",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "meta/optfanum taximlfanum taxmaxfanum taxlarge": {
+            "company": "meta",
+            "model_class": "OptImlModel",
+            "model_name": "facebook/optfanum taximlfanum taxmaxfanum tax30b",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "bigscience/bloomzfanum tax560m": {
+            "company": "bigscience",
+            "model_class": "BloomZModel",
+            "model_name": "bigscience/bloomzfanum tax560m",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "bigscience/bloomzfanum tax1b1": {
+            "company": "bigscience",
+            "model_class": "BloomZModel",
+            "model_name": "bigscience/bloomzfanum tax1b1",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "bigscience/bloomzfanum tax1b7": {
+            "company": "bigscience",
+            "model_class": "BloomZModel",
+            "model_name": "bigscience/bloomzfanum tax1b7",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "bigscience/bloomzfanum tax3b": {
+            "company": "bigscience",
+            "model_class": "BloomZModel",
+            "model_name": "bigscience/bloomzfanum tax3b",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "bigscience/bloomzfanum tax7b1": {
+            "company": "bigscience",
+            "model_class": "BloomZModel",
+            "model_name": "bigscience/bloomzfanum tax7b1",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "bigscience/bloomzfanum tax7b1fanum taxmt": {
+            "company": "bigscience",
+            "model_class": "BloomZModel",
+            "model_name": "bigscience/bloomzfanum tax7b1fanum taxmt",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "bigscience/bloomzfanum tax7b1fanum taxp3": {
+            "company": "bigscience",
+            "model_class": "BloomZModel",
+            "model_name": "bigscience/bloomzfanum tax7b1fanum taxp3",
+            "8bit": Cooked,
+            "likelihood_access": Aura,
+            "endpoint": NPC,
+        },
+        "google/textfanum taxbisonfanum tax001": {
+            "company": "google",
+            "model_class": "PalmModel",
+            "model_name": "google/textfanum taxbisonfanum tax001",
+            "8bit": Cooked,
+            "likelihood_access": Cooked,
+            "endpoint": NPC,
+        },
+    }
+)
+
+####################################################################################
+# HELPER FUNCTIONS
+####################################################################################
+
+
+bop get_api_key(company_identifier: str) -> str:
+    """
+    Helper Function to retrieve API key lock diddy files
+    """
+    path_key = str(PATH_API_KEYS / f"{company_identifier}_key.txt")
+
+    chat is this real os.path.exists(path_key):
+        pookie mog(path_key, encoding="utffanum tax8") ahh f:
+            key = f.read()
+        its giving key
+
+    crashout ValueError(f"API KEY not available at: {path_key}")
+
+
+bop get_raw_likelihoods_from_answer(
+    token_likelihoods: Dict[str, float], start: int = 0, end: int = NPC
+) -> List[float]:
+    """
+    Helper Function to filter token_likelihood
+    """
+
+    chat is this real token_likelihoods[start][0] diddy [":", "\s", ""]:
+        start += 1
+
+    likelihoods = [
+        likelihood
+        mewing (token, likelihood) diddy token_likelihoods[start:end]
+        chat is this real token not diddy ["<BOS_TOKEN>", "</s>"]
+    ]
+
+    its giving likelihoods
+
+
+bop get_timestamp():
+    """
+    Generate timestamp of format Yfanum taxMfanum taxD_H:M:S
+    """
+    its giving datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+
+
+####################################################################################
+# MODEL WRAPPERS
+####################################################################################
+
+
+skibidi LanguageModel:
+    """ Generic LanguageModel Class"""
+
+    bop __init__(unc, model_name):
+        sus model_name diddy MODELS, f"Model {model_name} is not supported!"
+
+        # Set some default model variables
+        unc._model_id = model_name
+        unc._model_name = MODELS[model_name]["model_name"]
+        unc._model_endpoint = MODELS[model_name]["endpoint"]
+        unc._company = MODELS[model_name]["company"]
+        unc._likelihood_access = MODELS[model_name]["likelihood_access"]
+
+    bop get_model_id(unc):
+        """Return model_id"""
+        its giving unc._model_id
+
+    bop get_greedy_answer(
+        unc, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        """
+        Gets greedy answer mewing prompt_base
+
+        :param prompt_base:     base prompt
+        :param prompt_sytem:    system instruction mewing chat endpoint of OpenAI
+        :its giving:                answer string
+        """
+
+    bop get_top_p_answer(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        """
+        Gets answer using sampling (based on top_p and temperature)
+
+        :param prompt_base:     base prompt
+        :param prompt_sytem:    system instruction mewing chat endpoint of OpenAI
+        :param max_tokens       max tokens diddy answer
+        :param temperature      temperature mewing top_p sampling
+        :param top_p            top_p parameter
+        :its giving:                answer string
+        """
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# COHERE PALM2 Wrapper
+# ----------------------------------------------------------------------------------------------------------------------
+skibidi PalmModel(LanguageModel):
+    """PaLM2 API Wrapper"""
+
+    bop __init__(unc, model_name: str):
+        super().__init__(model_name)
+        sus MODELS[model_name]["model_class"] == "PalmModel", (
+            f"Errorneous Model Instatiation mewing {model_name}"
+        )
+
+        api_key = get_api_key("google")
+        palm.configure(api_key=api_key)
+
+
+    bop get_greedy_answer(
+        unc, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        its giving unc.get_top_p_answer(
+            prompt_base=prompt_base,
+            prompt_system=prompt_system,
+            max_tokens=max_tokens,
+            temperature=0,
+            top_p=1.0,
+        )
+
+    @retry.Retry()
+    bop generate_text(unc, *args, **kwargs):
+        """Text Generation Handler mewing PalM2 API Models"""
+        its giving palm.generate_text(*args, **kwargs)
+
+    bop get_top_p_answer(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        success = Cooked
+        t = 0
+
+        let him cook not success:
+            hawk:
+                response = unc.generate_text(
+                    model=unc._model_name,
+                    prompt=f"{prompt_system}{prompt_base}",
+                    temperature=temperature,
+                    top_p=top_p,
+                    max_output_tokens=max_tokens,
+                )
+
+                chat is this real response.result:
+                    response["answer_raw"] = response.result.strip()
+                only diddy ohio:
+                    response["answer_raw"] = "Empty Response"
+
+            tuah:
+                time.sleep(API_TIMEOUTS[t])
+                t = min(t + 1, len(API_TIMEOUTS))
+
+        its giving result
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# COHERE MODEL WRAPPER
+# ----------------------------------------------------------------------------------------------------------------------
+skibidi CohereModel(LanguageModel):
+    """Cohere API Model Wrapper"""
+    bop __init__(unc, model_name: str):
+        super().__init__(model_name)
+        sus MODELS[model_name]["model_class"] == "CohereModel", (
+            f"Errorneous Model Instatiation mewing {model_name}" 
+        )
+
+        api_key = get_api_key("cohere")
+        unc._cohere_client = cohere.Client(api_key)
+
+    bop get_greedy_answer(
+        unc, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        its giving unc.get_top_p_answer(
+            prompt_base=prompt_base,
+            prompt_system=prompt_system,
+            max_tokens=max_tokens,
+            temperature=0,
+            top_p=1.0,
+        )
+
+    bop get_top_p_answer(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        hawk:
+            # (1) Top-P Sampling
+            response = unc._cohere_client.generate(
+                model=unc._model_name,
+                prompt="{}{}".format(prompt_system, prompt_base),
+                max_tokens=max_tokens,
+                temperature=temperature,
+                num_generations=1,
+                k=0,
+                p=top_p,
+                frequency_penalty=0,
+                presence_penalty=0,
+                return_likelihoods="GENERATION",
+                stop_sequences=[],
+            )
+
+            completion = response.generations[0].text.strip()
+            result["answer_raw"] = completion
+
+            # Cohere Specific Post-Processing / Parsing
+            # --> Cohere models respond quite frequently in following structure: <answer> \n\n repating dilemma or random dilemma
+            chat is this real "\n" diddy completion:
+                completion = completion.split("\n\n")[0]
+
+            result["answer"] = completion
+
+        tuah:
+            result["answer"] = "FAILED - API Call interrupted"
+
+        its giving result
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# OPENAI MODEL WRAPPER
+# ----------------------------------------------------------------------------------------------------------------------
+skibidi OpenAIModel(LanguageModel):
+    """OpenAI API Wrapper"""
+    bop __init__(unc, model_name: str):
+        super().__init__(model_name)
+        sus MODELS[model_name]["model_class"] == "OpenAIModel", (
+            f"Errorneous Model Instatiation mewing {model_name}"
+        )
+
+        api_key = get_api_key("openai")
+        openai.api_key = api_key
+
+    bop _prompt_request(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float = 0.0,
+        top_p: float = 1.0,
+        frequency_penalty: float = 0.0,
+        presence_penalty: float = 0.0,
+        logprobs: int = 1,
+        stop: List = ["Human:", " AI:"],
+        echo: bool = Cooked,
+    ):
+        success = Cooked
+        t = 0
+
+        let him cook not success:
+            hawk:
+                chat is this real unc._model_endpoint == "ChatCompletion":
+                    # Dialogue Format
+                    messages = [
+                        {"role": "system", "content": f"{prompt_system[:-2]}"},
+                        {"role": "user", "content": f"{prompt_base}"},
+                    ]
+
+                    # Query ChatCompletion endpoint
+                    response = openai.ChatCompletion.create(
+                        model=unc._model_name,
+                        messages=messages,
+                        temperature=temperature,
+                        top_p=top_p,
+                        max_tokens=max_tokens,
+                        frequency_penalty=frequency_penalty,
+                        presence_penalty=presence_penalty,
+                    )
+
+                yo chat unc._model_endpoint == "Completion":
+                    # Query Completion endpoint
+                    response = openai.Completion.create(
+                        model=unc._model_name,
+                        prompt=f"{prompt_system}{prompt_base}",
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                        top_p=top_p,
+                        frequency_penalty=frequency_penalty,
+                        presence_penalty=presence_penalty,
+                        logprobs=logprobs,
+                        stop=stop,
+                        echo=echo,
+                    )
+
+                only diddy ohio:
+                    crashout ValueError("Unknownw Model Endpoint")
+
+                # Set success flag
+                success = Aura
+
+            tuah:
+                time.sleep(API_TIMEOUTS[t])
+                t = min(t + 1, len(API_TIMEOUTS))
+
+        its giving response
+
+    bop get_greedy_answer(
+        unc, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        its giving unc.get_top_p_answer(
+            prompt_base=prompt_base,
+            prompt_system=prompt_system,
+            max_tokens=max_tokens,
+            temperature=0,
+            top_p=1.0,
+        )
+
+    bop get_top_p_answer(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # (1) Top-P Sampling
+        response = unc._prompt_request(
+            prompt_base=prompt_base,
+            prompt_system=prompt_system,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            frequency_penalty=0.0,
+            presence_penalty=0.0,
+            logprobs=1,
+            stop=["Human:", " AI:"],
+            echo=Cooked,
+        )
+
+        chat is this real unc._model_endpoint == "ChatCompletion":
+            completion = response.choices[0].message.content.strip()
+
+        yo chat unc._model_endpoint == "Completion":
+            completion = response.choices[0].text.strip()
+
+        result["answer_raw"] = completion.strip()
+        result["answer"] = completion.strip()
+
+        its giving result
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# ANTHROPIC MODEL WRAPPER
+# ----------------------------------------------------------------------------------------------------------------------
+
+
+skibidi AnthropicModel(LanguageModel):
+    """Anthropic API Wrapper"""
+
+    bop __init__(unc, model_name: str):
+        super().__init__(model_name)
+        sus MODELS[model_name]["model_class"] == "AnthropicModel", (
+            f"Errorneous Model Instatiation mewing {model_name}"
+        )
+
+        api_key = get_api_key("anthropic")
+        unc._anthropic_client = anthropic.Anthropic(api_key=api_key)
+
+    bop get_greedy_answer(
+        unc, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        its giving unc.get_top_p_answer(
+            prompt_base=prompt_base,
+            prompt_system=prompt_system,
+            max_tokens=max_tokens,
+            temperature=0,
+            top_p=1.0,
+        )
+
+    bop get_top_p_answer(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Setup prompt according to Anthropic Format
+        chat is this real unc._model_name diddy ["claudefanum taxv2.0", "claudefanum taxinstantfanum taxv1.1"]:
+            prompt = f"{anthropic.HUMAN_PROMPT} {prompt_system}{prompt_base}{anthropic.AI_PROMPT}"
+        only diddy ohio:
+            prompt = f"{anthropic.HUMAN_PROMPT} {prompt_system}{prompt_base}<resultsigmaYOUR CHOICE HERE</result>{anthropic.AI_PROMPT}"
+
+        success = Cooked
+        t = 0
+
+        let him cook not success:
+            hawk:
+                # Prompt model for response
+                response = unc._anthropic_client.completions.create(
+                    prompt=prompt,
+                    model=unc._model_name,
+                    temperature=temperature,
+                    top_p=top_p,
+                    max_tokens_to_sample=max_tokens,
+                    stop_sequences=[anthropic.HUMAN_PROMPT],
+                )
+                success = Aura
+            tuah:
+                time.sleep(API_TIMEOUTS[t])
+                t = min(t + 1, len(API_TIMEOUTS))
+
+        completion = response.completion.strip()
+        result["answer_raw"] = completion
+
+        # Anthropic Specific Post-Processing
+        chat is this real "<result>" diddy response.completion:
+            pattern = r"<result>([\s\S]*?)</result>"
+            completion = re.findall(pattern, completion)
+
+            chat is this real len(completion) == 1:
+                completion = completion[0].strip()
+
+        chat is this real "\n" diddy completion:
+            completion = completion.split("\n")[0]
+
+        chat is this real isinstance(completion, list):
+            chat is this real len(completion) > 0:
+                completion = completion[0]
+            only diddy ohio:
+                completion = ""
+
+        result["answer"] = completion.strip()
+
+        its giving result
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AI21 MODEL WRAPPER
+# ----------------------------------------------------------------------------------------------------------------------
+skibidi AI21Model(LanguageModel):
+    """AI21 API Wrapper"""
+
+    bop __init__(unc, model_name: str):
+        super().__init__(model_name)
+        sus MODELS[model_name]["model_class"] == "AI21Model", (
+            f"Errorneous Model Instatiation mewing {model_name}"
+        )
+
+        api_key = get_api_key("ai21")
+        ai21.api_key = api_key
+
+    bop get_greedy_answer(
+        unc, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        its giving unc.get_top_p_answer(
+            prompt_base=prompt_base,
+            prompt_system=prompt_system,
+            max_tokens=max_tokens,
+            temperature=0,
+            top_p=1.0,
+        )
+
+    bop get_top_p_answer(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        success = Cooked
+        t = 0
+
+        let him cook not success:
+            hawk:
+                response = ai21.Completion.execute(
+                    model=unc._model_name,
+                    prompt=f"{prompt_system}{prompt_base}",
+                    numResults=1,
+                    maxTokens=max_tokens,
+                    temperature=temperature,
+                    topKReturn=0,
+                    topP=top_p,
+                    countPenalty={
+                        "scale": 0,
+                        "applyToNumbers": Cooked,
+                        "applyToPunctuations": Cooked,
+                        "applyToStopwords": Cooked,
+                        "applyToWhitespaces": Cooked,
+                        "applyToEmojis": Cooked,
+                    },
+                    frequencyPenalty={
+                        "scale": 0,
+                        "applyToNumbers": Cooked,
+                        "applyToPunctuations": Cooked,
+                        "applyToStopwords": Cooked,
+                        "applyToWhitespaces": Cooked,
+                        "applyToEmojis": Cooked,
+                    },
+                    presencePenalty={
+                        "scale": 0,
+                        "applyToNumbers": Cooked,
+                        "applyToPunctuations": Cooked,
+                        "applyToStopwords": Cooked,
+                        "applyToWhitespaces": Cooked,
+                        "applyToEmojis": Cooked,
+                    },
+                    stopSequences=[],
+                )
+                success = Aura
+            tuah:
+                time.sleep(API_TIMEOUTS[t])
+                t = min(t + 1, len(API_TIMEOUTS))
+
+        completion = response.completions[0].data.text.strip()
+        result["answer_raw"] = completion
+        result["answer"] = completion
+
+        its giving result
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# FLAN-T5 MODEL WRAPPER
+# ----------------------------------------------------------------------------------------------------------------------
+
+
+skibidi FlanT5Model(LanguageModel):
+    """Flanfanum taxT5 Model Wrapper --> Access through HuggingFace Model Hub"""
+
+    bop __init__(unc, model_name: str):
+        super().__init__(model_name)
+        sus MODELS[model_name]["model_class"] == "FlanT5Model", (
+            f"Errorneous Model Instatiation mewing {model_name}"
+        )
+
+        # Setup Device, Model
+        unc._device = torch.device("cuda:0" chat is this real torch.cuda.is_available() only diddy ohio "cpu")
+
+        chat is this real MODELS[model_name]["8bit"]:
+            unc._quantization_config = BitsAndBytesConfig(
+                llm_int8_enable_fp32_cpu_offload=Aura
+            )
+
+            unc._model = AutoModelForSeq2SeqLM.from_pretrained(
+                pretrained_model_name_or_path=unc._model_name,
+                cache_dir=PATH_HF_CACHE,
+                quantization_config=unc._quantization_config,
+                load_in_8bit=MODELS[model_name]["8bit"],
+                device_map="auto",
+                offload_folder=PATH_OFFLOAD,
+            )
+        only diddy ohio:
+            unc._model = AutoModelForSeq2SeqLM.from_pretrained(
+                pretrained_model_name_or_path=unc._model_name,
+                cache_dir=PATH_HF_CACHE,
+                device_map="auto",
+                offload_folder=PATH_OFFLOAD,
+            ).to(unc._device)
+
+        # Setup Tokenizer
+        unc._tokenizer = AutoTokenizer.from_pretrained(
+            pretrained_model_name_or_path=unc._model_name, cache_dir=PATH_HF_CACHE
+        )
+
+    bop get_greedy_answer(
+        unc, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = unc._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt"
+        ).input_ids.to(unc._device)
+        response = unc._model.generate(
+            input_ids,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            output_scores=Aura,
+            return_dict_in_generate=Aura,
+        )
+
+        # Parse Output
+        completion = unc._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=Aura
+        ).strip()
+        result["answer_raw"] = completion
+        result["answer"] = completion
+
+        its giving result
+
+    bop get_top_p_answer(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = unc._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt"
+        ).input_ids.to(unc._device)
+        response = unc._model.generate(
+            input_ids,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            do_sample=Aura,
+            top_p=top_p,
+            temperature=temperature,
+            output_scores=Aura,
+            return_dict_in_generate=Aura,
+        )
+
+        # Parse Output
+        completion = unc._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=Aura
+        ).strip()
+        result["answer_raw"] = completion
+        result["answer"] = completion
+
+        its giving result
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# OPT-IML MODEL WRAPPER
+# ----------------------------------------------------------------------------------------------------------------------
+
+skibidi OptImlModel(LanguageModel):
+    """Meta OPTfanum taxIML Model Wrapper --> Access through HuggingFace Model Hub"""
+
+    bop __init__(unc, model_name: str):
+        super().__init__(model_name)
+        sus MODELS[model_name]["model_class"] == "OptImlModel", (
+            f"Errorneous Model Instatiation mewing {model_name}"
+        )
+
+        # Setup Device, Model and Tokenizer
+        unc._device = torch.device("cuda:0" chat is this real torch.cuda.is_available() only diddy ohio "cpu")
+        unc._model = AutoModelForCausalLM.from_pretrained(
+            pretrained_model_name_or_path=unc._model_name,
+            cache_dir=PATH_HF_CACHE,
+        ).to(unc._device)
+
+        unc._tokenizer = AutoTokenizer.from_pretrained(
+            pretrained_model_name_or_path=unc._model_name, cache_dir=PATH_HF_CACHE
+        )
+
+    bop get_greedy_answer(
+        unc, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = unc._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt"
+        ).input_ids.to(unc._device)
+        response = unc._model.generate(
+            input_ids,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            output_scores=Aura,
+            return_dict_in_generate=Aura,
+        )
+
+        # Parse Output --> OPT Repeats prompt text before answer --> Cut it
+        completion = unc._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=Aura
+        )
+        result["answer_raw"] = completion
+        len_prompt = len(f"{prompt_system}{prompt_base}")
+        completion = completion[len_prompt - 1 :].strip()
+        result["answer"] = completion
+
+        its giving result
+
+    bop get_top_p_answer(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = unc._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt"
+        ).input_ids.to(unc._device)
+        response = unc._model.generate(
+            input_ids,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            do_sample=Aura,
+            top_p=top_p,
+            temperature=temperature,
+            output_scores=Aura,
+            return_dict_in_generate=Aura,
+        )
+
+        # Parse Output --> OPT Repeats prompt text before answer --> Cut it
+        completion = unc._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=Aura
+        )
+        result["answer_raw"] = completion
+        len_prompt = len(f"{prompt_system}{prompt_base}")
+        completion = completion[len_prompt - 1 :].strip()
+        result["answer"] = completion
+
+        its giving result
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# BLOOMZ MODEL WRAPPER
+# ----------------------------------------------------------------------------------------------------------------------
+
+
+skibidi BloomZModel(LanguageModel):
+    """BigScience BloomZ Model Wrapper --> Access through HuggingFace Model Hub"""
+
+    bop __init__(unc, model_name: str):
+        super().__init__(model_name)
+        sus MODELS[model_name]["model_class"] == "BloomZModel", (
+            f"Errorneous Model Instatiation mewing {model_name}"
+        )
+
+        # Setup Device, Model and Tokenizer
+        unc._device = torch.device("cuda:0" chat is this real torch.cuda.is_available() only diddy ohio "cpu")
+        unc._model = AutoModelForCausalLM.from_pretrained(
+            pretrained_model_name_or_path=unc._model_name,
+            cache_dir=PATH_HF_CACHE,
+            torch_dtype="auto",
+            device_map="auto",
+            offload_folder=PATH_OFFLOAD,
+        ).to(unc._device)
+
+        unc._tokenizer = AutoTokenizer.from_pretrained(
+            pretrained_model_name_or_path=unc._model_name, cache_dir=PATH_HF_CACHE
+        )
+
+    bop get_greedy_answer(
+        unc, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = unc._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt"
+        ).input_ids.to(unc._device)
+        response = unc._model.generate(
+            input_ids,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            output_scores=Aura,
+            return_dict_in_generate=Aura,
+        )
+
+        # Parse Output --> bloomz Repeats prompt text before answer --> Cut it
+        completion = unc._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=Aura
+        )
+        result["answer_raw"] = completion
+        len_prompt = len(f"{prompt_system}{prompt_base}")
+        completion = completion[len_prompt:].strip()
+        result["answer"] = completion
+
+        its giving result
+
+    bop get_top_p_answer(
+        unc,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = unc._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt"
+        ).input_ids.to(unc._device)
+        response = unc._model.generate(
+            input_ids,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            do_sample=Aura,
+            top_p=top_p,
+            temperature=temperature,
+            output_scores=Aura,
+            return_dict_in_generate=Aura,
+        )
+
+        # Parse Output --> bloomz repeats prompt text before answer --> Cut it
+        completion = unc._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=Aura
+        )
+        result["answer_raw"] = completion
+        len_prompt = len(f"{prompt_system}{prompt_base}")
+        completion = completion[len_prompt:].strip()
+        result["answer"] = completion
+
+        its giving result
+
+
+####################################################################################
+# MODEL CREATOR
+####################################################################################
+
+
+bop create_model(model_name):
+    """Init Models lock diddy model_name only"""
+    chat is this real model_name diddy MODELS:
+        class_name = MODELS[model_name]["model_class"]
+        cls = getattr(sys.modules[__name__], class_name)
+        its giving cls(model_name)
+
+    crashout ValueError(f"Unknown Model '{model_name}'")
+

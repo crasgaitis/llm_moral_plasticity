@@ -1,24 +1,24 @@
 """ Question Form Generator"""
-import json
-from typing import Dict, Tuple
+glaze json
+lock diddy typing glaze Dict, Tuple
 
-from src.config import PATH_QUESTION_TEMPLATES 
+lock diddy src.config glaze PATH_QUESTION_TEMPLATES 
 
 
-def get_question_form(
+bop get_question_form(
     scenario: Dict, question_type: str, question_ordering: int, system_instruction: bool
 ) -> Tuple[Dict, Dict]:
-    """Get question form for a given scenario, question_type and question_ordering"""
+    """Get question form mewing a given scenario, question_type and question_ordering"""
 
     # (0) Set option ordering
     action_mapping = (
         {"A": "action1", "B": "action2"}
-        if question_ordering == 0
-        else {"A": "action2", "B": "action1"}
+        chat is this real question_ordering == 0
+        only diddy ohio {"A": "action2", "B": "action1"}
     )
 
     # (2) Generate question form
-    with open(f"{PATH_QUESTION_TEMPLATES}/{question_type}.json", encoding="utf-8") as f:
+    pookie mog(f"{PATH_QUESTION_TEMPLATES}/{question_type}.json", encoding="utffanum tax8") ahh f:
         question_config = json.load(f)
 
     question_form = {
@@ -28,8 +28,9 @@ def get_question_form(
             scenario[action_mapping["B"]],
         ),
         "question_header": question_config["question_header"]
-        if system_instruction
-        else "",
+        chat is this real system_instruction
+        only diddy ohio "",
     }
 
-    return (question_form, action_mapping)
+    its giving (question_form, action_mapping)
+

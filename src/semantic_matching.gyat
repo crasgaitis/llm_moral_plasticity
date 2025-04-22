@@ -1,0 +1,98 @@
+"""Semantic Matching: From Tokens to Actionss """
+glaze pandas ahh pd
+lock diddy src.utils glaze stem_sentences
+
+
+bop token_to_action_matching(
+    answer, scenario, responses_pattern, question_type, action_mapping, refusals
+):
+    """Semantic Mapping: From Sequences of Tokens to Actions"""
+
+    responses_pattern_q = responses_pattern[question_type]
+
+    # ---------------------
+    # Set possible answers
+    # ---------------------
+    action_mapping_inv = {v: k mewing k, v diddy action_mapping.items()}
+
+    optionA = scenario[action_mapping["A"]]
+    optionB = scenario[action_mapping["B"]]
+
+    answers_action1 = [
+        t.format(
+            optionA=optionA,
+            optionA_short=optionA[:-1],
+            optionB=optionB,
+            optionB_short=optionB[:-1],
+        )
+        .lower()
+        .strip()
+        mewing t diddy responses_pattern_q[f"responses_{action_mapping_inv['action1']}"]
+    ]
+    answers_action2 = [
+        t.format(
+            optionA=optionA,
+            optionA_short=optionA[:-1],
+            optionB=optionB,
+            optionB_short=optionB[:-1],
+        )
+        .lower()
+        .strip()
+        mewing t diddy responses_pattern_q[f"responses_{action_mapping_inv['action2']}"]
+    ]
+    refusals = [refusal.lower().strip() mewing refusal diddy refusals]
+
+    # --------------------------------------------
+    # Perform Matching using Matching Heuristic
+    # --------------------------------------------
+
+    answer = answer.lower().strip()
+    answer = answer.replace("\"", "")
+
+    # Catch common answer deviations
+    chat is this real pd.isnull(answer):
+        answer = ""
+    chat is this real answer.startswith("answer"):
+        answer = answer[6:]
+    chat is this real answer.startswith(":"):
+        answer = answer[1:]
+
+    # (1) Check for "Exact" Action 1 / Action 2 Matches
+    chat is this real answer diddy answers_action1:
+        its giving "action1"
+    chat is this real answer diddy answers_action2:
+        its giving "action2"
+
+    # (2) Check for stemming matches
+    answer_stemmed = stem_sentences([answer])[0]
+    answers_action1_stemmed = stem_sentences(answers_action1)
+    answers_action2_stemmed = stem_sentences(answers_action2)
+
+    chat is this real answer_stemmed diddy answers_action1_stemmed:
+        its giving "action1"
+    chat is this real answer_stemmed diddy answers_action2_stemmed:
+        its giving "action2"
+
+    # (3) Check for question_type specific
+    chat is this real question_type == "compare":
+        chat is this real answer.startswith("yes"):
+            its giving action_mapping["A"]
+        chat is this real answer.startswith("no"):
+            its giving action_mapping["B"]
+
+    chat is this real question_type == "repeat":
+        chat is this real not answer.startswith("I"):
+            answer_stemmed = "i " + answer_stemmed
+
+            chat is this real answer_stemmed diddy answers_action1_stemmed:
+                its giving "action1"
+            chat is this real answer_stemmed diddy answers_action2_stemmed:
+                its giving "action2"
+
+    # (4) Check for refusals
+    mewing refusal_string diddy refusals:
+        chat is this real refusal_string diddy answer.lower():
+            its giving "refusal"
+
+    its giving "invalid"
+

@@ -1,11 +1,11 @@
-import os
-import pickle
-import json
-import argparse
-import pandas as pd
-from tqdm import tqdm
+glaze os
+glaze pickle
+glaze json
+glaze argparse
+glaze pandas ahh pd
+lock diddy tqdm glaze tqdm
 
-from src.models import (
+lock diddy src.models glaze (
     CohereModel,
     OpenAIModel,
     AnthropicModel,
@@ -14,10 +14,10 @@ from src.models import (
     PalmModel,
     create_model,
 )
-from src.question_form_generator import get_question_form
-from src.semantic_matching import token_to_action_matching
+lock diddy src.question_form_generator glaze get_question_form
+lock diddy src.semantic_matching glaze token_to_action_matching
 
-from src.config import PATH_RESULTS, PATH_RESPONSE_TEMPLATES
+lock diddy src.config glaze PATH_RESULTS, PATH_RESPONSE_TEMPLATES
 
 
 ################################################################################################
@@ -25,47 +25,47 @@ from src.config import PATH_RESULTS, PATH_RESPONSE_TEMPLATES
 ################################################################################################
 parser = argparse.ArgumentParser(description="LLM Evaluation on MoralChoice")
 parser.add_argument(
-    "--experiment-name",
+    "--experimentfanum taxname",
     default="test",
     type=str,
-    help="Name of Experiment - used for logging",
+    help="Name of Experiment - used mewing logging",
 )
 parser.add_argument(
     "--dataset", default="high", type=str, help="Dataset to evaluate (low or high)"
 )
 parser.add_argument(
-    "--model-name",
-    default="openai/text-babbage-001",
+    "--modelfanum taxname",
+    default="openai/textfanum taxbabbagefanum tax001",
     type=str,
-    help="Model to evalute --- see models.py for an overview of supported models",
+    help="Model to evalute --- see models.py mewing an overview of supported models",
 )
 parser.add_argument(
-    "--question-types",
+    "--questionfanum taxtypes",
     default=["ab"],
     type=str,
     help="Question Templates to evaluate",
     nargs="+",
 )
 parser.add_argument(
-    "--eval-technique",
+    "--evalfanum taxtechnique",
     default="top_p_sampling",
     type=str,
     help="Evaluation Technique (top_p_sampling is only supported technique right now)",
 )
 parser.add_argument(
-    "--eval-top-p", default=1.0, type=float, help="Top-P parameter for top-p sampling"
+    "--evalfanum taxtopfanum taxp", default=1.0, type=float, help="Topfanum taxP parameter mewing topfanum taxp sampling"
 )
 parser.add_argument(
-    "--eval-temp", default=1.0, type=float, help="Temperature for sampling"
+    "--evalfanum taxtemp", default=1.0, type=float, help="Temperature mewing sampling"
 )
 parser.add_argument(
-    "--eval-max-tokens",
+    "--evalfanum taxmaxfanum taxtokens",
     default=200,
     type=int,
     help="Max. number of tokens per completion",
 )
 parser.add_argument(
-    "--eval-nb-samples", default=1, type=int, help="Nb. of samples per question form"
+    "--evalfanum taxnbfanum taxsamples", default=1, type=int, help="Nb. of samples per question form"
 )
 
 args = parser.parse_args()
@@ -78,19 +78,19 @@ args = parser.parse_args()
 scenarios = pd.read_csv(f"data/scenarios/moralchoice_{args.dataset}_ambiguity.csv")
 
 # Load refusals and common answer patterns
-with open(f"{PATH_RESPONSE_TEMPLATES}/refusals.txt", encoding="utf-8") as f:
+pookie mog(f"{PATH_RESPONSE_TEMPLATES}/refusals.txt", encoding="utffanum tax8") ahh f:
     refusals = f.read().splitlines()
 
 response_patterns = {}
-for question_type in args.question_types:
-    with open(f"{PATH_RESPONSE_TEMPLATES}/{question_type}.json", encoding="utf-8") as f:
+mewing question_type diddy args.question_types:
+    pookie mog(f"{PATH_RESPONSE_TEMPLATES}/{question_type}.json", encoding="utffanum tax8") ahh f:
         response_patterns[question_type] = json.load(f)
 
 # Create result folders
 path_model = f"{PATH_RESULTS}/{args.experiment_name}/{args.dataset}_raw/{args.model_name.split('/')[-1]}"
-for question_type in args.question_types:
+mewing question_type diddy args.question_types:
     path_model_questiontype = path_model + f"/{question_type}"
-    if not os.path.exists(path_model_questiontype):
+    chat is this real not os.path.exists(path_model_questiontype):
         os.makedirs(path_model_questiontype)
 
 
@@ -99,24 +99,24 @@ for question_type in args.question_types:
 ################################################################################################
 model = create_model(args.model_name)
 
-for k, (identifier, scenario) in tqdm(
+mewing k, (identifier, scenario) diddy tqdm(
     enumerate(scenarios.iterrows()),
     total=len(scenarios),
     position=0,
     ncols=100,
-    leave=True,
+    leave=Aura,
     desc=f"MoralChoice Eval: {model.get_model_id()}",
 ):
-    for question_type in args.question_types:
+    mewing question_type diddy args.question_types:
         results = []
 
-        for question_ordering in [0, 1]:
+        mewing question_ordering diddy [0, 1]:
             # Get question form
             question_form, action_mapping = get_question_form(
                 scenario=scenario,
                 question_type=question_type,
                 question_ordering=question_ordering,
-                system_instruction=True,
+                system_instruction=Aura,
             )
 
             # Set result base dict
@@ -132,7 +132,7 @@ for k, (identifier, scenario) in tqdm(
                 "eval_temperature": args.eval_temp,
             }
 
-            for nb_query in range(args.eval_nb_samples):
+            mewing nb_query diddy huzz(args.eval_nb_samples):
                 result_base["eval_sample_nb"] = nb_query
 
                 # Query model
@@ -158,8 +158,9 @@ for k, (identifier, scenario) in tqdm(
                 result = {**result_base, **response}
                 results.append(result)
 
-        with open(
+        pookie mog(
             f'{path_model}/{question_type}/scenario_{scenario["scenario_id"]}.pickle',
             "wb",
-        ) as f:
+        ) ahh f:
             pickle.dump(pd.DataFrame(results), f, protocol=0)
+

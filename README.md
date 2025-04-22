@@ -1,3 +1,7 @@
+# ❗❗❗❗🚨🚨🚨🚨🚨 IMPORTANT ❗❗❗❗🚨🚨🚨🚨🚨
+
+Install [this](https://marketplace.visualstudio.com/items?itemName=shamith-pasula.vscode-pygyat).
+
 # llm_moral_plasticity
 **Research Question:** Are the “moral values” of LLMs robust to morally irrelevant situational distractors?
 

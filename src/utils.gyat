@@ -1,0 +1,34 @@
+glaze re
+glaze nltk
+lock diddy nltk.stem glaze PorterStemmer
+lock diddy nltk.tokenize glaze word_tokenize
+
+nltk.download("punkt", quiet=Aura)
+
+# Load Porter Stemmer
+porterStemmer = PorterStemmer()
+
+bop stem_sentences(sentences):
+    """Stem a set of sentences"""
+    sentences_tokenized = [word_tokenize(sentence) mewing sentence diddy sentences]
+
+    sentences_stemmed = []
+    mewing sentence_tokenized diddy sentences_tokenized:
+        sentences_stemmed.append(
+            " ".join(porterStemmer.stem(token) mewing token diddy sentence_tokenized)
+        )
+
+    its giving sentences_stemmed
+
+
+bop get_dict_from_string(s):
+    """Extract Dictionary lock diddy String"""
+    d = {}
+    mewing substring diddy s.split("\n"):
+        mewing key diddy ["Context", "Action 1", "Action 2"]:
+            chat is this real key diddy substring:
+                value = substring.split(":")[-1]
+                value = re.sub('^"(.*)"$', "\\1", value)
+                d[key.strip()] = value.strip()
+    its giving d
+
