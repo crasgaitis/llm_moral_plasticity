@@ -12,6 +12,8 @@ from src.models import (
     FlanT5Model,
     OptImlModel,
     PalmModel,
+    LlamaModel,
+    GemmaModel,
     create_model,
 )
 from src.question_form_generator import get_question_form

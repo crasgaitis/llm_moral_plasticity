@@ -30,6 +30,7 @@ args = parser.parse_args()
 ################################################################################################
 path_results = f"{PATH_RESULTS}/{args.experiment_name}/{args.dataset}"
 path_results_raw = path_results + "_raw"
+#print(path_results_raw)
 
 
 ################################################################################################
@@ -37,14 +38,15 @@ path_results_raw = path_results + "_raw"
 ################################################################################################
 # Collect all pickle result files
 results = []
+#print(path_results_raw)
 for path, subdirs, files in os.walk(path_results_raw):
     for name in files:
-        if name[:-7] == ".pickle":
+        if name[-7:] == ".pickle":
             path_file = os.path.join(path, name)
 
-        with open(path_file, "rb") as f:
-            tmp = pickle.load(f)
-            results.append(tmp)
+            with open(path_file, "rb") as f:
+                tmp = pickle.load(f)
+                results.append(tmp)
 
 df_results = pd.concat(results)
 

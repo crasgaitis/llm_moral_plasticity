@@ -24,6 +24,9 @@ from transformers import (
 
 from src.config import PATH_API_KEYS, PATH_HF_CACHE, PATH_OFFLOAD
 
+from accelerate import Accelerator
+
+from huggingface_hub import login
 
 API_TIMEOUTS = [1, 2, 4, 8, 16, 32]
 
@@ -390,6 +393,22 @@ MODELS = dict(
             "model_name": "google/text-bison-001",
             "8bit": False,
             "likelihood_access": False,
+            "endpoint": None,
+        },
+        "meta-llama/Llama-3.2-1B-Instruct": {
+            "company": "meta",
+            "model_class": "LlamaModel",
+            "model_name": "meta-llama/Llama-3.2-1B-Instruct",
+            "8bit": False,
+            "likelihood_access": True,
+            "endpoint": None,
+        },
+        "google/gemma-2-2b-it": {
+            "company": "google",
+            "model_class": "GemmaModel",
+            "model_name": "google/gemma-2-2b-it",
+            "8bit": False,
+            "likelihood_access": True,
             "endpoint": None,
         },
     }
@@ -952,7 +971,7 @@ class FlanT5Model(LanguageModel):
         )
 
         # Setup Device, Model
-        self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        #self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         if MODELS[model_name]["8bit"]:
             self._quantization_config = BitsAndBytesConfig(
@@ -973,7 +992,9 @@ class FlanT5Model(LanguageModel):
                 cache_dir=PATH_HF_CACHE,
                 device_map="auto",
                 offload_folder=PATH_OFFLOAD,
-            ).to(self._device)
+            )#.to(self._device)
+
+        self._device = next(self._model.parameters()).device
 
         # Setup Tokenizer
         self._tokenizer = AutoTokenizer.from_pretrained(
@@ -1239,6 +1260,201 @@ class BloomZModel(LanguageModel):
 # MODEL CREATOR
 ####################################################################################
 
+class LlamaModel(LanguageModel):
+    """Llama 3.2 Model Wrapper --> Access through HuggingFace Model Hub"""
+
+    def __init__(self, model_name: str):
+        super().__init__(model_name)
+        assert MODELS[model_name]["model_class"] == "LlamaModel", (
+            f"Errorneous Model Instatiation for {model_name}"
+        )
+
+        # Setup access using HF login
+        login(token=get_api_key("huggingface"))
+
+        # Setup Device, Model
+        #self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        if MODELS[model_name]["8bit"]:
+            raise ValueError(f"Unknown Model '{model_name}'")
+        else:
+            self._model = AutoModelForCausalLM.from_pretrained(
+                pretrained_model_name_or_path=self._model_name,
+                cache_dir=PATH_HF_CACHE,
+                device_map="auto",
+                offload_folder=PATH_OFFLOAD,
+            )#.to(self._device)
+
+        self._device = next(self._model.parameters()).device
+
+        # Setup Tokenizer
+        self._tokenizer = AutoTokenizer.from_pretrained(
+            pretrained_model_name_or_path=self._model_name, cache_dir=PATH_HF_CACHE
+        )
+
+    def get_greedy_answer(
+        self, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = self._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt", return_attention_mask=True
+        )
+        response = self._model.generate(
+            input_ids=input_ids["input_ids"].to(self._device),
+            attention_mask=input_ids["attention_mask"].to(self._device),
+            pad_token_id=self._tokenizer.eos_token_id,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            output_scores=True,
+            return_dict_in_generate=True,
+        )
+
+        # Parse Output
+        completion = self._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=True
+        ).strip()
+        result["answer_raw"] = completion
+        result["answer"] = completion
+
+        return result
+
+    def get_top_p_answer(
+        self,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = self._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt", return_attention_mask=True
+        )
+        response = self._model.generate(
+            input_ids=input_ids["input_ids"].to(self._device),
+            attention_mask=input_ids["attention_mask"].to(self._device),
+            pad_token_id=self._tokenizer.eos_token_id,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            do_sample=True,
+            top_p=top_p,
+            temperature=temperature,
+            output_scores=True,
+            return_dict_in_generate=True,
+        )
+
+        # Parse Output
+        completion = self._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=True
+        ).strip()
+        result["answer_raw"] = completion
+        result["answer"] = completion
+
+        return result
+
+class GemmaModel(LanguageModel):
+    """Gemma 2 Model Wrapper --> Access through HuggingFace Model Hub"""
+
+    def __init__(self, model_name: str):
+        super().__init__(model_name)
+        assert MODELS[model_name]["model_class"] == "GemmaModel", (
+            f"Errorneous Model Instatiation for {model_name}"
+        )
+
+        # Setup access using HF login
+        login(token=get_api_key("huggingface"))
+
+        # Setup Device, Model
+        #self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        if MODELS[model_name]["8bit"]:
+            raise ValueError(f"Unknown Model '{model_name}'")
+        else:
+            self._model = AutoModelForCausalLM.from_pretrained(
+                pretrained_model_name_or_path=self._model_name,
+                cache_dir=PATH_HF_CACHE,
+                device_map="auto",
+                offload_folder=PATH_OFFLOAD,
+            )#.to(self._device)
+
+        self._device = next(self._model.parameters()).device
+
+        # Setup Tokenizer
+        self._tokenizer = AutoTokenizer.from_pretrained(
+            pretrained_model_name_or_path=self._model_name, cache_dir=PATH_HF_CACHE
+        )
+
+    def get_greedy_answer(
+        self, prompt_base: str, prompt_system: str, max_tokens: int
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = self._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt"
+        ).input_ids.to(self._device)
+        response = self._model.generate(
+            input_ids,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            output_scores=True,
+            return_dict_in_generate=True,
+        )
+
+        # Parse Output
+        completion = self._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=True
+        ).strip()
+        result["answer_raw"] = completion
+        result["answer"] = completion
+
+        return result
+
+    def get_top_p_answer(
+        self,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+        result = {
+            "timestamp": get_timestamp(),
+        }
+
+        # Greedy Search
+        input_ids = self._tokenizer(
+            f"{prompt_system}{prompt_base}", return_tensors="pt"
+        ).input_ids.to(self._device)
+        response = self._model.generate(
+            input_ids,
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            do_sample=True,
+            top_p=top_p,
+            temperature=temperature,
+            output_scores=True,
+            return_dict_in_generate=True,
+        )
+
+        # Parse Output
+        completion = self._tokenizer.decode(
+            response.sequences[0], skip_special_tokens=True
+        ).strip()
+        result["answer_raw"] = completion
+        result["answer"] = completion
+
+        return result
 
 def create_model(model_name):
     """Init Models from model_name only"""
