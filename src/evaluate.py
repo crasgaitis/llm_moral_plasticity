@@ -77,7 +77,7 @@ args = parser.parse_args()
 ################################################################################################
 
 # Load scenarios
-scenarios = pd.read_csv(f"data/scenarios/moralchoice_{args.dataset}_ambiguity.csv")
+scenarios = pd.read_csv(f"data/scenarios/{args.dataset}.csv")
 
 # Load refusals and common answer patterns
 with open(f"{PATH_RESPONSE_TEMPLATES}/refusals.txt", encoding="utf-8") as f:
