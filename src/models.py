@@ -1041,10 +1041,13 @@ class FlanT5Model(LanguageModel):
             "timestamp": get_timestamp(),
         }
 
+        # print(f"START:{prompt_system}{prompt_base}")
+
         # Greedy Search
-        input_ids = self._tokenizer(
-            f"{prompt_system}{prompt_base}", return_tensors="pt"
-        ).input_ids.to(self._device)
+        input_ids = self._tokenizer("What is the square root of 4?", return_tensors="pt").input_ids.to(self._device)
+        # input_ids = self._tokenizer(
+        #     f"{prompt_system}{prompt_base}", return_tensors="pt"
+        # ).input_ids.to(self._device)
         response = self._model.generate(
             input_ids,
             max_new_tokens=max_tokens,
