@@ -1041,6 +1041,8 @@ class FlanT5Model(LanguageModel):
             "timestamp": get_timestamp(),
         }
 
+        #print(f"PROMPT:\n{prompt_system}{prompt_base}\n")
+
         # Greedy Search
         input_ids = self._tokenizer(
             f"{prompt_system}{prompt_base}", return_tensors="pt"
@@ -1060,10 +1062,59 @@ class FlanT5Model(LanguageModel):
         completion = self._tokenizer.decode(
             response.sequences[0], skip_special_tokens=True
         ).strip()
+        #print(f"MODEL RESPONSE:\n{completion}\n")
         result["answer_raw"] = completion
         result["answer"] = completion
 
         return result
+
+    def get_batched_top_p_answer(
+        self,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+
+        all_prompts = [f"{prompt_system}{p}" for p in prompt_base]
+
+        # Greedy Search
+        input_ids = self._tokenizer(
+            all_prompts, 
+            return_tensors="pt", 
+            padding=True,
+            return_attention_mask=True
+        ).to(self._device)
+        responses = self._model.generate(
+            input_ids=input_ids["input_ids"],
+            attention_mask=input_ids["attention_mask"],
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            do_sample=True,
+            top_p=top_p,
+            temperature=temperature,
+            output_scores=True,
+            return_dict_in_generate=True,
+        )
+
+        # Parse Outputs
+        results = []
+        for sequence in responses.sequences:
+            prompt_len = input_ids["input_ids"].shape[1]
+            full_completion = self._tokenizer.decode(
+                sequence, skip_special_tokens=True
+            ).strip()
+            completion = self._tokenizer.decode(
+                sequence[prompt_len:], skip_special_tokens=True
+            ).strip()
+            results.append({
+                "timestamp" : get_timestamp(),
+                "answer_raw" : full_completion,
+                "answer" : completion,
+            })
+
+        return results
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1370,7 +1421,7 @@ class GemmaModel(LanguageModel):
         )
 
         # Setup access using HF login
-        login(token=get_api_key("huggingface"))
+        login(token="")
 
         # Setup Device, Model
         #self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -1455,6 +1506,55 @@ class GemmaModel(LanguageModel):
         result["answer"] = completion
 
         return result
+
+    def get_batched_top_p_answer(
+        self,
+        prompt_base: str,
+        prompt_system: str,
+        max_tokens: int,
+        temperature: float,
+        top_p: float,
+    ) -> str:
+
+        all_prompts = [f"{prompt_system}{p}" for p in prompt_base]
+
+        # Greedy Search
+        input_ids = self._tokenizer(
+            all_prompts, 
+            return_tensors="pt", 
+            padding=True, 
+            truncation=True,
+            return_attention_mask=True
+        ).to(self._device)
+        responses = self._model.generate(
+            input_ids=input_ids["input_ids"],
+            attention_mask=input_ids["attention_mask"],
+            max_new_tokens=max_tokens,
+            length_penalty=0,
+            do_sample=True,
+            top_p=top_p,
+            temperature=temperature,
+            output_scores=True,
+            return_dict_in_generate=True,
+        )
+
+        # Parse Outputs
+        results = []
+        for sequence in responses.sequences:
+            prompt_len = input_ids["input_ids"].shape[1]
+            full_completion = self._tokenizer.decode(
+                sequence, skip_special_tokens=True
+            ).strip()
+            completion = self._tokenizer.decode(
+                sequence[prompt_len:], skip_special_tokens=True
+            ).strip()
+            results.append({
+                "timestamp" : get_timestamp(),
+                "answer_raw" : full_completion,
+                "answer" : completion,
+            })
+
+        return results
 
 def create_model(model_name):
     """Init Models from model_name only"""

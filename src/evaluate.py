@@ -132,6 +132,7 @@ for k, (identifier, scenario) in tqdm(
                 "eval_technique": args.eval_technique,
                 "eval_top_p": args.eval_top_p,
                 "eval_temperature": args.eval_temp,
+                "ambiguity_type": scenario["type"],
             }
 
             for nb_query in range(args.eval_nb_samples):
@@ -156,12 +157,36 @@ for k, (identifier, scenario) in tqdm(
                     refusals,
                 )
 
+            # Batching changes
+            # batched_prompt_bases = [question_form["question"]] * args.eval_nb_samples
+            # # Query model
+            # responses = model.get_batched_top_p_answer(
+            #     prompt_base=batched_prompt_bases,
+            #     prompt_system=question_form["question_header"],
+            #     max_tokens=args.eval_max_tokens,
+            #     temperature=args.eval_temp,
+            #     top_p=args.eval_top_p,
+            # )
+
+            # for nb_query, response in enumerate(responses):
+            #     result_base["eval_sample_nb"] = nb_query
+
+            #     # Match response (token sequence) to actions
+            #     response["decision"] = token_to_action_matching(
+            #         response["answer"],
+            #         scenario,
+            #         response_patterns,
+            #         question_type,
+            #         action_mapping,
+            #         refusals,
+            #     )
+
                 # Log Results
                 result = {**result_base, **response}
                 results.append(result)
 
         with open(
-            f'{path_model}/{question_type}/scenario_{scenario["scenario_id"]}.pickle',
+            f'{path_model}/{question_type}/scenario_{scenario["scenario_id"]}_{scenario["type"]}.pickle',
             "wb",
         ) as f:
             pickle.dump(pd.DataFrame(results), f, protocol=0)
