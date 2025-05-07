@@ -141,7 +141,7 @@ for k, (identifier, scenario) in tqdm(
                 response = model.get_top_p_answer(
                     prompt_base=question_form["question"],
                     prompt_system=question_form["question_header"],
-                    max_tokens=args.eval_max_tokens,
+                    max_tokens=1,
                     temperature=args.eval_temp,
                     top_p=args.eval_top_p,
                 )

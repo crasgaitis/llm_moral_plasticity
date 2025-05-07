@@ -1,4 +1,9 @@
 # llm_moral_plasticity
+**Useful Commands:**
+```python -m src.evaluate     --experiment-name "moraltest_2"     --dataset "NEW_moralchoice_high_ambiguity"     --model "google/flan-t5-small"     --question-types "ab"     --eval-nb-samples 5 --eval-max-tokens 1```
+
+```python -m src.collect   --experiment-name "moraltest_2" --dataset "NEW_moralchoice_high_ambiguity"```
+
 **Research Question:** Are the “moral values” of LLMs robust to morally irrelevant situational distractors?
 
 **Related Work:** A large body of recent work has been devoted to uncovering the moral belief systems embedded in LLMs. Marrafini et al. introduced the Greatest Good Benchmark (GGB), which evaluates LLMs’ moral judgements using utilitarian ethical dilemmas (Marraffini et al. 2024). Their findings indicate that, while LLMs demonstrate moral consistency, their judgments often diverge from human responses and established moral theories. Seeking a more nuanced understanding, Ji et al. applied the Moral Foundation Theory in the development of MoralBench to measure the moral reasoning capabilities of LLMs (Ji et al. 2024). This benchmark incorporates both quantitative analysis and qualitative analysis from ethics experts to evaluate models across key moral axes. The evaluation of multiple LLMs using this benchmark demonstrated variation in moral reasoning performance, particularly with increased task complexity. Scherrer et al. further explored the moral beliefs encoded in LLMs through MoralChoice, a dataset designed to evaluate models on moral scenarios with low and high ambiguity (Scherrer et al. 2023). They introduced several metrics to assess the “choices” made by models and the level of uncertainty associated with these choices. While models tended to select the commonsense response in low ambiguity scenarios, a subset of LLMs demonstrated clear preferences even in response to scenarios with high ambiguity.
