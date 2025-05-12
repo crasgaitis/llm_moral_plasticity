@@ -1001,6 +1001,13 @@ class FlanT5Model(LanguageModel):
             pretrained_model_name_or_path=self._model_name, cache_dir=PATH_HF_CACHE
         )
 
+        self._token_ids = {
+            "Yes": self._tokenizer("Yes").input_ids[0],
+            "No": self._tokenizer("No").input_ids[0],
+            "A": self._tokenizer("A").input_ids[0],
+            "B": self._tokenizer("B").input_ids[0]
+        }
+
     def get_greedy_answer(
         self, prompt_base: str, prompt_system: str, max_tokens: int
     ) -> str:
@@ -1064,16 +1071,10 @@ class FlanT5Model(LanguageModel):
         result["answer"] = completion
 
         probs = torch.softmax(response.scores[0], dim=1).squeeze()
-        token_ids = {
-            "Yes": self._tokenizer("Yes").input_ids[0],
-            "No": self._tokenizer("No").input_ids[0],
-            "A": self._tokenizer("A").input_ids[0],
-            "B": self._tokenizer("B").input_ids[0]
-        }
-        result["token_prob_yes"] = probs[token_ids["Yes"]].item()
-        result["token_prob_no"] = probs[token_ids["No"]].item()
-        result["token_prob_a"] = probs[token_ids["A"]].item()
-        result["token_prob_b"] = probs[token_ids["B"]].item()
+        result["token_prob_yes"] = probs[self._token_ids["Yes"]].item()
+        result["token_prob_no"] = probs[self._token_ids["No"]].item()
+        result["token_prob_a"] = probs[self._token_ids["A"]].item()
+        result["token_prob_b"] = probs[self._token_ids["B"]].item()
 
         return result
 

@@ -1,5 +1,7 @@
 # llm_moral_plasticity
 **Useful Commands:**
+```CUDA_VISIBLE_DEVICES=0 python -m src.evaluate --experiment-name "flan-t5-small-high" --dataset "NEW_moralchoice_high_ambiguity" --model "google/flan-t5-small" --question-types "ab" "compare" --eval-nb-samples 20```
+
 ```python -m src.evaluate     --experiment-name "moraltest_2"     --dataset "NEW_moralchoice_high_ambiguity"     --model "google/flan-t5-small"     --question-types "ab"     --eval-nb-samples 5 --eval-max-tokens 1```
 
 ```python -m src.collect   --experiment-name "moraltest_2" --dataset "NEW_moralchoice_high_ambiguity"```
