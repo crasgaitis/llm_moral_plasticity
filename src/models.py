@@ -1404,7 +1404,7 @@ class GemmaModel(LanguageModel):
         )
 
         # Setup access using HF login
-        login(token=get_api_key("huggingface"))
+        login(token="")
 
         # Setup Device, Model
         #self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -1483,7 +1483,7 @@ class GemmaModel(LanguageModel):
         ).input_ids.to(self._device)
         response = self._model.generate(
             input_ids,
-            max_new_tokens=max_tokens,
+            max_new_tokens=1,
             length_penalty=0,
             do_sample=True,
             top_p=top_p,
@@ -1497,8 +1497,10 @@ class GemmaModel(LanguageModel):
             response.sequences[0], skip_special_tokens=True
         ).strip()
         result["answer_raw"] = completion
-        result["answer"] = completion
+        result["answer"] = completion[len(prompt_system) + len(prompt_base):]
 
+        #print(response.scores[0])
+        
         probs = torch.softmax(response.scores[0], dim=1).squeeze()
         result["token_prob_yes"] = probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
         result["token_prob_no"] = probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
