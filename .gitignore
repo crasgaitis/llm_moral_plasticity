@@ -3,3 +3,4 @@ api_keys/
 src/__pycache__/
 cache/
 python
+*.pkl
