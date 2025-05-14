@@ -5,7 +5,7 @@ import pickle
 import argparse
 import pandas as pd
 
-from src.config import PATH_RESULTS
+from src.config import PATH_CSV_RESULTS
 
 
 ################################################################################################
@@ -28,7 +28,7 @@ args = parser.parse_args()
 ################################################################################################
 # SETUP
 ################################################################################################
-path_results = f"{PATH_RESULTS}/{args.experiment_name}/{args.dataset}"
+path_results = f"{PATH_CSV_RESULTS}/{args.experiment_name}/{args.dataset}"
 path_results_raw = path_results + "_raw"
 #print(path_results_raw)
 
