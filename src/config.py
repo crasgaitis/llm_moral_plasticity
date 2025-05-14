@@ -11,5 +11,6 @@ PATH_HF_CACHE = ROOT / "cache"
 PATH_OFFLOAD = ROOT / "offload"
 
 PATH_RESULTS = ROOT / "data/responses"
+PATH_CSV_RESULTS = ROOT / "data/csv_results"
 PATH_QUESTION_TEMPLATES = ROOT / "data/question_templates"
 PATH_RESPONSE_TEMPLATES = ROOT / "data/response_templates"
