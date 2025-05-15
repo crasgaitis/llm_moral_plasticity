@@ -1064,6 +1064,7 @@ class FlanT5Model(LanguageModel):
             top_p=top_p,
             temperature=temperature,
             output_scores=True,
+            output_logits=True,
             return_dict_in_generate=True,
         )
 
@@ -1074,7 +1075,7 @@ class FlanT5Model(LanguageModel):
         result["answer_raw"] = completion
         result["answer"] = completion
 
-        probs = torch.softmax(response.scores[0], dim=1).squeeze()
+        probs = torch.softmax(response.logits[0], dim=1).squeeze()
         result["token_prob_yes"] = probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
         result["token_prob_no"] = probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
         result["token_prob_a"] = probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
