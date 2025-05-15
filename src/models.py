@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import time
+import math
 import torch
 import ai21
 import cohere
@@ -659,11 +660,12 @@ class OpenAIModel(LanguageModel):
     def __init__(self, model_name: str):
         super().__init__(model_name)
         assert MODELS[model_name]["model_class"] == "OpenAIModel", (
-            f"Errorneous Model Instatiation for {model_name}"
+            f"Erroneous Model Instantiation for {model_name}"
         )
 
         api_key = get_api_key("openai")
-        openai.api_key = api_key
+        # openai.api_key = api_key
+        self._client = openai.OpenAI(api_key=api_key)
 
     def _prompt_request(
         self,
@@ -683,48 +685,32 @@ class OpenAIModel(LanguageModel):
 
         while not success:
             try:
-                if self._model_endpoint == "ChatCompletion":
-                    # Dialogue Format
-                    messages = [
-                        {"role": "system", "content": f"{prompt_system[:-2]}"},
-                        {"role": "user", "content": f"{prompt_base}"},
-                    ]
+                # Dialogue Format
+                messages = [
+                    {"role": "system", "content": f"{prompt_system[:-2]}"},
+                    {"role": "user", "content": f"{prompt_base}"},
+                ]
 
-                    # Query ChatCompletion endpoint
-                    response = openai.ChatCompletion.create(
-                        model=self._model_name,
-                        messages=messages,
-                        temperature=temperature,
-                        top_p=top_p,
-                        max_tokens=max_tokens,
-                        frequency_penalty=frequency_penalty,
-                        presence_penalty=presence_penalty,
-                    )
-
-                elif self._model_endpoint == "Completion":
-                    # Query Completion endpoint
-                    response = openai.Completion.create(
-                        model=self._model_name,
-                        prompt=f"{prompt_system}{prompt_base}",
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                        top_p=top_p,
-                        frequency_penalty=frequency_penalty,
-                        presence_penalty=presence_penalty,
-                        logprobs=logprobs,
-                        stop=stop,
-                        echo=echo,
-                    )
-
-                else:
-                    raise ValueError("Unknownw Model Endpoint")
+                # Query ChatCompletion endpoint
+                response = self._client.chat.completions.create(
+                    model=self._model_name,
+                    messages=messages,
+                    temperature=temperature,
+                    top_p=top_p,
+                    max_tokens=max_tokens,
+                    frequency_penalty=frequency_penalty,
+                    presence_penalty=presence_penalty,
+                    logprobs=True,
+                    top_logprobs=20
+                )
 
                 # Set success flag
                 success = True
 
-            except:
+            except Exception as e:
+                print(e)
                 time.sleep(API_TIMEOUTS[t])
-                t = min(t + 1, len(API_TIMEOUTS))
+                t = min(t + 1, len(API_TIMEOUTS) - 1)
 
         return response
 
@@ -746,7 +732,7 @@ class OpenAIModel(LanguageModel):
         max_tokens: int,
         temperature: float,
         top_p: float,
-    ) -> str:
+    ) -> any:
         result = {
             "timestamp": get_timestamp(),
         }
@@ -765,14 +751,30 @@ class OpenAIModel(LanguageModel):
             echo=False,
         )
 
-        if self._model_endpoint == "ChatCompletion":
-            completion = response.choices[0].message.content.strip()
-
-        elif self._model_endpoint == "Completion":
-            completion = response.choices[0].text.strip()
+        completion = response.choices[0].message.content.strip()
 
         result["answer_raw"] = completion.strip()
         result["answer"] = completion.strip()
+
+        logprobs = response.choices[0].logprobs.content[0].top_logprobs
+        token_probs = {
+            "Yes": 0,
+            "yes": 0,
+            "No": 0,
+            "no": 0,
+            "A": 0,
+            "a": 0,
+            "B": 0,
+            "b": 0
+        }
+        for logprob in logprobs:
+            if logprob.token in token_probs.keys():
+                token_probs[logprob.token] = math.exp(logprob.logprob)
+
+        result["token_prob_yes"] = token_probs["Yes"] + token_probs["yes"]
+        result["token_prob_no"] = token_probs["No"] + token_probs["no"]
+        result["token_prob_a"] = token_probs["A"] + token_probs["a"]
+        result["token_prob_b"] = token_probs["B"] + token_probs["b"]
 
         return result
 
@@ -959,7 +961,6 @@ class AI21Model(LanguageModel):
 # ----------------------------------------------------------------------------------------------------------------------
 # FLAN-T5 MODEL WRAPPER
 # ----------------------------------------------------------------------------------------------------------------------
-
 
 class FlanT5Model(LanguageModel):
     """Flan-T5 Model Wrapper --> Access through HuggingFace Model Hub"""
