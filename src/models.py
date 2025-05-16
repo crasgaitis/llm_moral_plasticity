@@ -1011,14 +1011,14 @@ class FlanT5Model(LanguageModel):
             "B": self._tokenizer("B").input_ids[0],
             "a": self._tokenizer("a").input_ids[0],
             "b": self._tokenizer("b").input_ids[0],
-            " Yes": self._tokenizer("Yes").input_ids[0],
-            " No": self._tokenizer("No").input_ids[0],
-            " yes": self._tokenizer("yes").input_ids[0],
-            " no": self._tokenizer("no").input_ids[0],
-            " A": self._tokenizer("A").input_ids[0],
-            " B": self._tokenizer("B").input_ids[0],
-            " a": self._tokenizer("a").input_ids[0],
-            " b": self._tokenizer("b").input_ids[0]
+            " Yes": self._tokenizer(" Yes").input_ids[0],
+            " No": self._tokenizer(" No").input_ids[0],
+            " yes": self._tokenizer(" yes").input_ids[0],
+            " no": self._tokenizer(" no").input_ids[0],
+            " A": self._tokenizer(" A").input_ids[0],
+            " B": self._tokenizer(" B").input_ids[0],
+            " a": self._tokenizer(" a").input_ids[0],
+            " b": self._tokenizer(" b").input_ids[0]
         }
 
     def get_greedy_answer(
@@ -1333,14 +1333,14 @@ class LlamaModel(LanguageModel):
             "B": self._tokenizer("B").input_ids[0],
             "a": self._tokenizer("a").input_ids[0],
             "b": self._tokenizer("b").input_ids[0],
-            " Yes": self._tokenizer("Yes").input_ids[0],
-            " No": self._tokenizer("No").input_ids[0],
-            " yes": self._tokenizer("yes").input_ids[0],
-            " no": self._tokenizer("no").input_ids[0],
-            " A": self._tokenizer("A").input_ids[0],
-            " B": self._tokenizer("B").input_ids[0],
-            " a": self._tokenizer("a").input_ids[0],
-            " b": self._tokenizer("b").input_ids[0]
+            " Yes": self._tokenizer(" Yes").input_ids[0],
+            " No": self._tokenizer(" No").input_ids[0],
+            " yes": self._tokenizer(" yes").input_ids[0],
+            " no": self._tokenizer(" no").input_ids[0],
+            " A": self._tokenizer(" A").input_ids[0],
+            " B": self._tokenizer(" B").input_ids[0],
+            " a": self._tokenizer(" a").input_ids[0],
+            " b": self._tokenizer(" b").input_ids[0]
         }
 
     def get_greedy_answer(
@@ -1431,7 +1431,7 @@ class GemmaModel(LanguageModel):
         )
 
         # Setup access using HF login
-        login(token="")
+        login(token=get_api_key("huggingface"))
 
         # Setup Device, Model
         #self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -1462,14 +1462,14 @@ class GemmaModel(LanguageModel):
             "B": self._tokenizer("B").input_ids[1],
             "a": self._tokenizer("a").input_ids[1],
             "b": self._tokenizer("b").input_ids[1],
-            " Yes": self._tokenizer("Yes").input_ids[0],
-            " No": self._tokenizer("No").input_ids[0],
-            " yes": self._tokenizer("yes").input_ids[0],
-            " no": self._tokenizer("no").input_ids[0],
-            " A": self._tokenizer("A").input_ids[0],
-            " B": self._tokenizer("B").input_ids[0],
-            " a": self._tokenizer("a").input_ids[0],
-            " b": self._tokenizer("b").input_ids[0]
+            " Yes": self._tokenizer(" Yes").input_ids[1],
+            " No": self._tokenizer(" No").input_ids[1],
+            " yes": self._tokenizer(" yes").input_ids[1],
+            " no": self._tokenizer(" no").input_ids[1],
+            " A": self._tokenizer(" A").input_ids[1],
+            " B": self._tokenizer(" B").input_ids[1],
+            " a": self._tokenizer(" a").input_ids[1],
+            " b": self._tokenizer(" b").input_ids[1]
         }
 
     def get_greedy_answer(
