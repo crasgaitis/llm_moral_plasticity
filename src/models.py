@@ -1010,7 +1010,15 @@ class FlanT5Model(LanguageModel):
             "A": self._tokenizer("A").input_ids[0],
             "B": self._tokenizer("B").input_ids[0],
             "a": self._tokenizer("a").input_ids[0],
-            "b": self._tokenizer("b").input_ids[0]
+            "b": self._tokenizer("b").input_ids[0],
+            " Yes": self._tokenizer("Yes").input_ids[0],
+            " No": self._tokenizer("No").input_ids[0],
+            " yes": self._tokenizer("yes").input_ids[0],
+            " no": self._tokenizer("no").input_ids[0],
+            " A": self._tokenizer("A").input_ids[0],
+            " B": self._tokenizer("B").input_ids[0],
+            " a": self._tokenizer("a").input_ids[0],
+            " b": self._tokenizer("b").input_ids[0]
         }
 
     def get_greedy_answer(
@@ -1077,10 +1085,15 @@ class FlanT5Model(LanguageModel):
         result["answer"] = completion
 
         probs = torch.softmax(response.logits[0], dim=1).squeeze()
-        result["token_prob_yes"] = probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
-        result["token_prob_no"] = probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
-        result["token_prob_a"] = probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
-        result["token_prob_b"] = probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
+
+        result["token_prob_yes"] = probs[self._token_ids[" Yes"]].item() + probs[self._token_ids[" yes"]].item() 
+        + probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
+        result["token_prob_no"] = probs[self._token_ids[" No"]].item() + probs[self._token_ids[" no"]].item() 
+        + probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
+        result["token_prob_a"] = probs[self._token_ids[" A"]].item() + probs[self._token_ids[" a"]].item() 
+        + probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
+        result["token_prob_b"] = probs[self._token_ids[" B"]].item() + probs[self._token_ids[" b"]].item() 
+        + probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
 
         return result
 
@@ -1319,7 +1332,15 @@ class LlamaModel(LanguageModel):
             "A": self._tokenizer("A").input_ids[0],
             "B": self._tokenizer("B").input_ids[0],
             "a": self._tokenizer("a").input_ids[0],
-            "b": self._tokenizer("b").input_ids[0]
+            "b": self._tokenizer("b").input_ids[0],
+            " Yes": self._tokenizer("Yes").input_ids[0],
+            " No": self._tokenizer("No").input_ids[0],
+            " yes": self._tokenizer("yes").input_ids[0],
+            " no": self._tokenizer("no").input_ids[0],
+            " A": self._tokenizer("A").input_ids[0],
+            " B": self._tokenizer("B").input_ids[0],
+            " a": self._tokenizer("a").input_ids[0],
+            " b": self._tokenizer("b").input_ids[0]
         }
 
     def get_greedy_answer(
@@ -1389,10 +1410,14 @@ class LlamaModel(LanguageModel):
         result["answer"] = completion
 
         probs = torch.softmax(response.scores[0], dim=1).squeeze()
-        result["token_prob_yes"] = probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
-        result["token_prob_no"] = probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
-        result["token_prob_a"] = probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
-        result["token_prob_b"] = probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
+        result["token_prob_yes"] = probs[self._token_ids[" Yes"]].item() + probs[self._token_ids[" yes"]].item() 
+        + probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
+        result["token_prob_no"] = probs[self._token_ids[" No"]].item() + probs[self._token_ids[" no"]].item() 
+        + probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
+        result["token_prob_a"] = probs[self._token_ids[" A"]].item() + probs[self._token_ids[" a"]].item() 
+        + probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
+        result["token_prob_b"] = probs[self._token_ids[" B"]].item() + probs[self._token_ids[" b"]].item() 
+        + probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
 
         return result
 
@@ -1436,7 +1461,15 @@ class GemmaModel(LanguageModel):
             "A": self._tokenizer("A").input_ids[1],
             "B": self._tokenizer("B").input_ids[1],
             "a": self._tokenizer("a").input_ids[1],
-            "b": self._tokenizer("b").input_ids[1]
+            "b": self._tokenizer("b").input_ids[1],
+            " Yes": self._tokenizer("Yes").input_ids[0],
+            " No": self._tokenizer("No").input_ids[0],
+            " yes": self._tokenizer("yes").input_ids[0],
+            " no": self._tokenizer("no").input_ids[0],
+            " A": self._tokenizer("A").input_ids[0],
+            " B": self._tokenizer("B").input_ids[0],
+            " a": self._tokenizer("a").input_ids[0],
+            " b": self._tokenizer("b").input_ids[0]
         }
 
     def get_greedy_answer(
@@ -1504,10 +1537,14 @@ class GemmaModel(LanguageModel):
 
         probs = torch.softmax(response.logits[0], dim=1).squeeze()
         
-        result["token_prob_yes"] = probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
-        result["token_prob_no"] = probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
-        result["token_prob_a"] = probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
-        result["token_prob_b"] = probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
+        result["token_prob_yes"] = probs[self._token_ids[" Yes"]].item() + probs[self._token_ids[" yes"]].item() 
+        + probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
+        result["token_prob_no"] = probs[self._token_ids[" No"]].item() + probs[self._token_ids[" no"]].item() 
+        + probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
+        result["token_prob_a"] = probs[self._token_ids[" A"]].item() + probs[self._token_ids[" a"]].item() 
+        + probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
+        result["token_prob_b"] = probs[self._token_ids[" B"]].item() + probs[self._token_ids[" b"]].item() 
+        + probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
 
         return result
 
