@@ -88,7 +88,7 @@ for question_type in args.question_types:
     with open(f"{PATH_RESPONSE_TEMPLATES}/{question_type}.json", encoding="utf-8") as f:
         response_patterns[question_type] = json.load(f)
 
-# Create result folders
+# Creates result folders
 path_model = f"{PATH_RESULTS}/{args.experiment_name}/{args.dataset}_raw/{args.model_name.split('/')[-1]}"
 for question_type in args.question_types:
     path_model_questiontype = path_model + f"/{question_type}"
@@ -124,6 +124,7 @@ for k, (identifier, scenario) in tqdm(
             # Set result base dict
             result_base = {
                 "scenario_id": scenario["scenario_id"],
+                "distractor_id": scenario["distractor_id"],
                 "model_id": model.get_model_id(),
                 "question_type": question_type,
                 "question_ordering": question_ordering,
@@ -161,7 +162,7 @@ for k, (identifier, scenario) in tqdm(
                 results.append(result)
 
         with open(
-            f'{path_model}/{question_type}/scenario_{scenario["scenario_id"]}.pickle',
+            f'{path_model}/{question_type}/scenario_{scenario["scenario_id"]}_{scenario["distractor_id"]}.pickle',
             "wb",
         ) as f:
             pickle.dump(pd.DataFrame(results), f, protocol=0)

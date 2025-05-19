@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import time
+import math
 import torch
 import ai21
 import cohere
@@ -127,6 +128,14 @@ MODELS = dict(
             "company": "openai",
             "model_class": "OpenAIModel",
             "model_name": "gpt-4",
+            "8bit": None,
+            "likelihood_access": False,
+            "endpoint": "ChatCompletion",
+        },
+        "openai/gpt-4.1-mini": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "gpt-4.1-mini",
             "8bit": None,
             "likelihood_access": False,
             "endpoint": "ChatCompletion",
@@ -659,11 +668,12 @@ class OpenAIModel(LanguageModel):
     def __init__(self, model_name: str):
         super().__init__(model_name)
         assert MODELS[model_name]["model_class"] == "OpenAIModel", (
-            f"Errorneous Model Instatiation for {model_name}"
+            f"Erroneous Model Instantiation for {model_name}"
         )
 
         api_key = get_api_key("openai")
-        openai.api_key = api_key
+        # openai.api_key = api_key
+        self._client = openai.OpenAI(api_key=api_key)
 
     def _prompt_request(
         self,
@@ -683,48 +693,32 @@ class OpenAIModel(LanguageModel):
 
         while not success:
             try:
-                if self._model_endpoint == "ChatCompletion":
-                    # Dialogue Format
-                    messages = [
-                        {"role": "system", "content": f"{prompt_system[:-2]}"},
-                        {"role": "user", "content": f"{prompt_base}"},
-                    ]
+                # Dialogue Format
+                messages = [
+                    {"role": "system", "content": f"{prompt_system[:-2]}"},
+                    {"role": "user", "content": f"{prompt_base}"},
+                ]
 
-                    # Query ChatCompletion endpoint
-                    response = openai.ChatCompletion.create(
-                        model=self._model_name,
-                        messages=messages,
-                        temperature=temperature,
-                        top_p=top_p,
-                        max_tokens=max_tokens,
-                        frequency_penalty=frequency_penalty,
-                        presence_penalty=presence_penalty,
-                    )
-
-                elif self._model_endpoint == "Completion":
-                    # Query Completion endpoint
-                    response = openai.Completion.create(
-                        model=self._model_name,
-                        prompt=f"{prompt_system}{prompt_base}",
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                        top_p=top_p,
-                        frequency_penalty=frequency_penalty,
-                        presence_penalty=presence_penalty,
-                        logprobs=logprobs,
-                        stop=stop,
-                        echo=echo,
-                    )
-
-                else:
-                    raise ValueError("Unknownw Model Endpoint")
+                # Query ChatCompletion endpoint
+                response = self._client.chat.completions.create(
+                    model=self._model_name,
+                    messages=messages,
+                    temperature=temperature,
+                    top_p=top_p,
+                    max_tokens=max_tokens,
+                    frequency_penalty=frequency_penalty,
+                    presence_penalty=presence_penalty,
+                    logprobs=True,
+                    top_logprobs=20
+                )
 
                 # Set success flag
                 success = True
 
-            except:
+            except Exception as e:
+                print(e)
                 time.sleep(API_TIMEOUTS[t])
-                t = min(t + 1, len(API_TIMEOUTS))
+                t = min(t + 1, len(API_TIMEOUTS) - 1)
 
         return response
 
@@ -746,7 +740,7 @@ class OpenAIModel(LanguageModel):
         max_tokens: int,
         temperature: float,
         top_p: float,
-    ) -> str:
+    ) -> any:
         result = {
             "timestamp": get_timestamp(),
         }
@@ -765,14 +759,38 @@ class OpenAIModel(LanguageModel):
             echo=False,
         )
 
-        if self._model_endpoint == "ChatCompletion":
-            completion = response.choices[0].message.content.strip()
-
-        elif self._model_endpoint == "Completion":
-            completion = response.choices[0].text.strip()
+        completion = response.choices[0].message.content.strip()
 
         result["answer_raw"] = completion.strip()
         result["answer"] = completion.strip()
+
+        logprobs = response.choices[0].logprobs.content[0].top_logprobs
+        token_probs = {
+            "Yes": 0,
+            "yes": 0,
+            "No": 0,
+            "no": 0,
+            "A": 0,
+            "a": 0,
+            "B": 0,
+            "b": 0,
+            " Yes": 0,
+            " No": 0,
+            " yes": 0,
+            " no": 0,
+            " A": 0,
+            " B": 0,
+            " a": 0,
+            " b": 0
+        }
+        for logprob in logprobs:
+            if logprob.token in token_probs.keys():
+                token_probs[logprob.token] = math.exp(logprob.logprob)
+
+        result["token_prob_yes"] = token_probs["Yes"] + token_probs["yes"] + token_probs[" Yes"] + token_probs[" yes"]
+        result["token_prob_no"] = token_probs["No"] + token_probs["no"] + token_probs[" No"] + token_probs[" no"]
+        result["token_prob_a"] = token_probs["A"] + token_probs["a"] + token_probs[" A"] + token_probs[" a"]
+        result["token_prob_b"] = token_probs["B"] + token_probs["b"] + token_probs[" B"] + token_probs[" b"]
 
         return result
 
@@ -960,7 +978,6 @@ class AI21Model(LanguageModel):
 # FLAN-T5 MODEL WRAPPER
 # ----------------------------------------------------------------------------------------------------------------------
 
-
 class FlanT5Model(LanguageModel):
     """Flan-T5 Model Wrapper --> Access through HuggingFace Model Hub"""
 
@@ -1009,7 +1026,15 @@ class FlanT5Model(LanguageModel):
             "A": self._tokenizer("A").input_ids[0],
             "B": self._tokenizer("B").input_ids[0],
             "a": self._tokenizer("a").input_ids[0],
-            "b": self._tokenizer("b").input_ids[0]
+            "b": self._tokenizer("b").input_ids[0],
+            " Yes": self._tokenizer(" Yes").input_ids[0],
+            " No": self._tokenizer(" No").input_ids[0],
+            " yes": self._tokenizer(" yes").input_ids[0],
+            " no": self._tokenizer(" no").input_ids[0],
+            " A": self._tokenizer(" A").input_ids[0],
+            " B": self._tokenizer(" B").input_ids[0],
+            " a": self._tokenizer(" a").input_ids[0],
+            " b": self._tokenizer(" b").input_ids[0]
         }
 
     def get_greedy_answer(
@@ -1064,6 +1089,7 @@ class FlanT5Model(LanguageModel):
             top_p=top_p,
             temperature=temperature,
             output_scores=True,
+            output_logits=True,
             return_dict_in_generate=True,
         )
 
@@ -1074,11 +1100,16 @@ class FlanT5Model(LanguageModel):
         result["answer_raw"] = completion
         result["answer"] = completion
 
-        probs = torch.softmax(response.scores[0], dim=1).squeeze()
-        result["token_prob_yes"] = probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
-        result["token_prob_no"] = probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
-        result["token_prob_a"] = probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
-        result["token_prob_b"] = probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
+        probs = torch.softmax(response.logits[0], dim=1).squeeze()
+
+        result["token_prob_yes"] = probs[self._token_ids[" Yes"]].item() + probs[self._token_ids[" yes"]].item() 
+        + probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
+        result["token_prob_no"] = probs[self._token_ids[" No"]].item() + probs[self._token_ids[" no"]].item() 
+        + probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
+        result["token_prob_a"] = probs[self._token_ids[" A"]].item() + probs[self._token_ids[" a"]].item() 
+        + probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
+        result["token_prob_b"] = probs[self._token_ids[" B"]].item() + probs[self._token_ids[" b"]].item() 
+        + probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
 
         return result
 
@@ -1310,14 +1341,22 @@ class LlamaModel(LanguageModel):
         )
 
         self._token_ids = {
-            "Yes": self._tokenizer("Yes").input_ids[0],
-            "No": self._tokenizer("No").input_ids[0],
-            "yes": self._tokenizer("yes").input_ids[0],
-            "no": self._tokenizer("no").input_ids[0],
-            "A": self._tokenizer("A").input_ids[0],
-            "B": self._tokenizer("B").input_ids[0],
-            "a": self._tokenizer("a").input_ids[0],
-            "b": self._tokenizer("b").input_ids[0]
+            "Yes": self._tokenizer("Yes").input_ids[1],
+            "No": self._tokenizer("No").input_ids[1],
+            "yes": self._tokenizer("yes").input_ids[1],
+            "no": self._tokenizer("no").input_ids[1],
+            "A": self._tokenizer("A").input_ids[1],
+            "B": self._tokenizer("B").input_ids[1],
+            "a": self._tokenizer("a").input_ids[1],
+            "b": self._tokenizer("b").input_ids[1],
+            " Yes": self._tokenizer(" Yes").input_ids[1],
+            " No": self._tokenizer(" No").input_ids[1],
+            " yes": self._tokenizer(" yes").input_ids[1],
+            " no": self._tokenizer(" no").input_ids[1],
+            " A": self._tokenizer(" A").input_ids[1],
+            " B": self._tokenizer(" B").input_ids[1],
+            " a": self._tokenizer(" a").input_ids[1],
+            " b": self._tokenizer(" b").input_ids[1]
         }
 
     def get_greedy_answer(
@@ -1364,11 +1403,11 @@ class LlamaModel(LanguageModel):
 
         # Greedy Search
         input_ids = self._tokenizer(
-            f"{prompt_system}{prompt_base}", return_tensors="pt", return_attention_mask=True
-        )
+            f"{prompt_system}{prompt_base}", return_tensors="pt"#, return_attention_mask=True
+        ).input_ids.to(self._device)
         response = self._model.generate(
-            input_ids=input_ids["input_ids"].to(self._device),
-            attention_mask=input_ids["attention_mask"].to(self._device),
+            input_ids=input_ids,
+            #attention_mask=input_ids["attention_mask"].to(self._device),
             pad_token_id=self._tokenizer.eos_token_id,
             max_new_tokens=max_tokens,
             length_penalty=0,
@@ -1376,6 +1415,7 @@ class LlamaModel(LanguageModel):
             top_p=top_p,
             temperature=temperature,
             output_scores=True,
+            output_logits=True,
             return_dict_in_generate=True,
         )
 
@@ -1384,13 +1424,18 @@ class LlamaModel(LanguageModel):
             response.sequences[0], skip_special_tokens=True
         ).strip()
         result["answer_raw"] = completion
-        result["answer"] = completion
+        result["answer"] = completion[len(prompt_system) + len(prompt_base) - 1:]
 
-        probs = torch.softmax(response.scores[0], dim=1).squeeze()
-        result["token_prob_yes"] = probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
-        result["token_prob_no"] = probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
-        result["token_prob_a"] = probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
-        result["token_prob_b"] = probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
+        probs = torch.softmax(response.logits[0], dim=1).squeeze()
+
+        result["token_prob_yes"] = probs[self._token_ids[" Yes"]].item() + probs[self._token_ids[" yes"]].item() 
+        + probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
+        result["token_prob_no"] = probs[self._token_ids[" No"]].item() + probs[self._token_ids[" no"]].item() 
+        + probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
+        result["token_prob_a"] = probs[self._token_ids[" A"]].item() + probs[self._token_ids[" a"]].item() 
+        + probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
+        result["token_prob_b"] = probs[self._token_ids[" B"]].item() + probs[self._token_ids[" b"]].item() 
+        + probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
 
         return result
 
@@ -1404,7 +1449,7 @@ class GemmaModel(LanguageModel):
         )
 
         # Setup access using HF login
-        login(token="")
+        login(token=get_api_key("huggingface"))
 
         # Setup Device, Model
         #self._device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -1427,14 +1472,22 @@ class GemmaModel(LanguageModel):
         )
 
         self._token_ids = {
-            "Yes": self._tokenizer("Yes").input_ids[0],
-            "No": self._tokenizer("No").input_ids[0],
-            "yes": self._tokenizer("yes").input_ids[0],
-            "no": self._tokenizer("no").input_ids[0],
-            "A": self._tokenizer("A").input_ids[0],
-            "B": self._tokenizer("B").input_ids[0],
-            "a": self._tokenizer("a").input_ids[0],
-            "b": self._tokenizer("b").input_ids[0]
+            "Yes": self._tokenizer("Yes").input_ids[1],
+            "No": self._tokenizer("No").input_ids[1],
+            "yes": self._tokenizer("yes").input_ids[1],
+            "no": self._tokenizer("no").input_ids[1],
+            "A": self._tokenizer("A").input_ids[1],
+            "B": self._tokenizer("B").input_ids[1],
+            "a": self._tokenizer("a").input_ids[1],
+            "b": self._tokenizer("b").input_ids[1],
+            " Yes": self._tokenizer(" Yes").input_ids[1],
+            " No": self._tokenizer(" No").input_ids[1],
+            " yes": self._tokenizer(" yes").input_ids[1],
+            " no": self._tokenizer(" no").input_ids[1],
+            " A": self._tokenizer(" A").input_ids[1],
+            " B": self._tokenizer(" B").input_ids[1],
+            " a": self._tokenizer(" a").input_ids[1],
+            " b": self._tokenizer(" b").input_ids[1]
         }
 
     def get_greedy_answer(
@@ -1489,6 +1542,7 @@ class GemmaModel(LanguageModel):
             top_p=top_p,
             temperature=temperature,
             output_scores=True,
+            output_logits=True,
             return_dict_in_generate=True,
         )
 
@@ -1499,13 +1553,16 @@ class GemmaModel(LanguageModel):
         result["answer_raw"] = completion
         result["answer"] = completion[len(prompt_system) + len(prompt_base):]
 
-        #print(response.scores[0])
+        probs = torch.softmax(response.logits[0], dim=1).squeeze()
         
-        probs = torch.softmax(response.scores[0], dim=1).squeeze()
-        result["token_prob_yes"] = probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
-        result["token_prob_no"] = probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
-        result["token_prob_a"] = probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
-        result["token_prob_b"] = probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
+        result["token_prob_yes"] = probs[self._token_ids[" Yes"]].item() + probs[self._token_ids[" yes"]].item() 
+        + probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
+        result["token_prob_no"] = probs[self._token_ids[" No"]].item() + probs[self._token_ids[" no"]].item() 
+        + probs[self._token_ids["No"]].item() + probs[self._token_ids["no"]].item()
+        result["token_prob_a"] = probs[self._token_ids[" A"]].item() + probs[self._token_ids[" a"]].item() 
+        + probs[self._token_ids["A"]].item() + probs[self._token_ids["a"]].item()
+        result["token_prob_b"] = probs[self._token_ids[" B"]].item() + probs[self._token_ids[" b"]].item() 
+        + probs[self._token_ids["B"]].item() + probs[self._token_ids["b"]].item()
 
         return result
 
