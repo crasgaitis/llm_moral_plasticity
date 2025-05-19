@@ -132,6 +132,14 @@ MODELS = dict(
             "likelihood_access": False,
             "endpoint": "ChatCompletion",
         },
+        "openai/gpt-4.1-mini": {
+            "company": "openai",
+            "model_class": "OpenAIModel",
+            "model_name": "gpt-4.1-mini",
+            "8bit": None,
+            "likelihood_access": False,
+            "endpoint": "ChatCompletion",
+        },
         "anthropic/claude-v1.0": {
             "company": "anthropic",
             "model_class": "AnthropicModel",
@@ -765,16 +773,24 @@ class OpenAIModel(LanguageModel):
             "A": 0,
             "a": 0,
             "B": 0,
-            "b": 0
+            "b": 0,
+            " Yes": 0,
+            " No": 0,
+            " yes": 0,
+            " no": 0,
+            " A": 0,
+            " B": 0,
+            " a": 0,
+            " b": 0
         }
         for logprob in logprobs:
             if logprob.token in token_probs.keys():
                 token_probs[logprob.token] = math.exp(logprob.logprob)
 
-        result["token_prob_yes"] = token_probs["Yes"] + token_probs["yes"]
-        result["token_prob_no"] = token_probs["No"] + token_probs["no"]
-        result["token_prob_a"] = token_probs["A"] + token_probs["a"]
-        result["token_prob_b"] = token_probs["B"] + token_probs["b"]
+        result["token_prob_yes"] = token_probs["Yes"] + token_probs["yes"] + token_probs[" Yes"] + token_probs[" yes"]
+        result["token_prob_no"] = token_probs["No"] + token_probs["no"] + token_probs[" No"] + token_probs[ "no"]
+        result["token_prob_a"] = token_probs["A"] + token_probs["a"] + token_probs[" A"] + token_probs[" a"]
+        result["token_prob_b"] = token_probs["B"] + token_probs["b"] + token_probs[" B"] + token_probs[" b"]
 
         return result
 
