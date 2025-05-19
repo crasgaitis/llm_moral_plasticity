@@ -1341,22 +1341,22 @@ class LlamaModel(LanguageModel):
         )
 
         self._token_ids = {
-            "Yes": self._tokenizer("Yes").input_ids[0],
-            "No": self._tokenizer("No").input_ids[0],
-            "yes": self._tokenizer("yes").input_ids[0],
-            "no": self._tokenizer("no").input_ids[0],
-            "A": self._tokenizer("A").input_ids[0],
-            "B": self._tokenizer("B").input_ids[0],
-            "a": self._tokenizer("a").input_ids[0],
-            "b": self._tokenizer("b").input_ids[0],
-            " Yes": self._tokenizer(" Yes").input_ids[0],
-            " No": self._tokenizer(" No").input_ids[0],
-            " yes": self._tokenizer(" yes").input_ids[0],
-            " no": self._tokenizer(" no").input_ids[0],
-            " A": self._tokenizer(" A").input_ids[0],
-            " B": self._tokenizer(" B").input_ids[0],
-            " a": self._tokenizer(" a").input_ids[0],
-            " b": self._tokenizer(" b").input_ids[0]
+            "Yes": self._tokenizer("Yes").input_ids[1],
+            "No": self._tokenizer("No").input_ids[1],
+            "yes": self._tokenizer("yes").input_ids[1],
+            "no": self._tokenizer("no").input_ids[1],
+            "A": self._tokenizer("A").input_ids[1],
+            "B": self._tokenizer("B").input_ids[1],
+            "a": self._tokenizer("a").input_ids[1],
+            "b": self._tokenizer("b").input_ids[1],
+            " Yes": self._tokenizer(" Yes").input_ids[1],
+            " No": self._tokenizer(" No").input_ids[1],
+            " yes": self._tokenizer(" yes").input_ids[1],
+            " no": self._tokenizer(" no").input_ids[1],
+            " A": self._tokenizer(" A").input_ids[1],
+            " B": self._tokenizer(" B").input_ids[1],
+            " a": self._tokenizer(" a").input_ids[1],
+            " b": self._tokenizer(" b").input_ids[1]
         }
 
     def get_greedy_answer(
@@ -1403,11 +1403,11 @@ class LlamaModel(LanguageModel):
 
         # Greedy Search
         input_ids = self._tokenizer(
-            f"{prompt_system}{prompt_base}", return_tensors="pt", return_attention_mask=True
-        )
+            f"{prompt_system}{prompt_base}", return_tensors="pt"#, return_attention_mask=True
+        ).input_ids.to(self._device)
         response = self._model.generate(
-            input_ids=input_ids["input_ids"].to(self._device),
-            attention_mask=input_ids["attention_mask"].to(self._device),
+            input_ids=input_ids,
+            #attention_mask=input_ids["attention_mask"].to(self._device),
             pad_token_id=self._tokenizer.eos_token_id,
             max_new_tokens=max_tokens,
             length_penalty=0,
@@ -1415,6 +1415,7 @@ class LlamaModel(LanguageModel):
             top_p=top_p,
             temperature=temperature,
             output_scores=True,
+            output_logits=True,
             return_dict_in_generate=True,
         )
 
@@ -1423,9 +1424,10 @@ class LlamaModel(LanguageModel):
             response.sequences[0], skip_special_tokens=True
         ).strip()
         result["answer_raw"] = completion
-        result["answer"] = completion
+        result["answer"] = completion[len(prompt_system) + len(prompt_base) - 1:]
 
-        probs = torch.softmax(response.scores[0], dim=1).squeeze()
+        probs = torch.softmax(response.logits[0], dim=1).squeeze()
+
         result["token_prob_yes"] = probs[self._token_ids[" Yes"]].item() + probs[self._token_ids[" yes"]].item() 
         + probs[self._token_ids["Yes"]].item() + probs[self._token_ids["yes"]].item()
         result["token_prob_no"] = probs[self._token_ids[" No"]].item() + probs[self._token_ids[" no"]].item() 
