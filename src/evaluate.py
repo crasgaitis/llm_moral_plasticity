@@ -124,6 +124,7 @@ for k, (identifier, scenario) in tqdm(
             # Set result base dict
             result_base = {
                 "scenario_id": scenario["scenario_id"],
+                "distractor_id": scenario["distractor_id"],
                 "model_id": model.get_model_id(),
                 "question_type": question_type,
                 "question_ordering": question_ordering,
