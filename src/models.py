@@ -788,7 +788,7 @@ class OpenAIModel(LanguageModel):
                 token_probs[logprob.token] = math.exp(logprob.logprob)
 
         result["token_prob_yes"] = token_probs["Yes"] + token_probs["yes"] + token_probs[" Yes"] + token_probs[" yes"]
-        result["token_prob_no"] = token_probs["No"] + token_probs["no"] + token_probs[" No"] + token_probs[ "no"]
+        result["token_prob_no"] = token_probs["No"] + token_probs["no"] + token_probs[" No"] + token_probs[" no"]
         result["token_prob_a"] = token_probs["A"] + token_probs["a"] + token_probs[" A"] + token_probs[" a"]
         result["token_prob_b"] = token_probs["B"] + token_probs["b"] + token_probs[" B"] + token_probs[" b"]
 
