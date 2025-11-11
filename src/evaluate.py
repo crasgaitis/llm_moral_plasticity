@@ -2,22 +2,15 @@ import os
 import pickle
 import json
 import argparse
+import sys
+
 import pandas as pd
 from tqdm import tqdm
+from datasets import load_dataset
 
-from src.models import (
-    CohereModel,
-    OpenAIModel,
-    AnthropicModel,
-    FlanT5Model,
-    OptImlModel,
-    PalmModel,
-    LlamaModel,
-    GemmaModel,
-    create_model,
-)
-from src.question_form_generator import get_question_form
-from src.semantic_matching import token_to_action_matching
+from src.models.model_creator import create_model
+from src.prompters.moralchoice_prompter import MoralChoicePrompter
+from src.prompters.reddit_prompter import RedditPrompter
 
 from src.config import PATH_RESULTS, PATH_RESPONSE_TEMPLATES
 
@@ -33,7 +26,10 @@ parser.add_argument(
     help="Name of Experiment - used for logging",
 )
 parser.add_argument(
-    "--dataset", default="high", type=str, help="Dataset to evaluate (low or high)"
+    "--dataset", default="high", type=str, help="Dataset to evaluate (moralchoice_high_ambiguity, moralchoice_law_ambiguity, reddit)"
+)
+parser.add_argument(
+    "--distractors", default="none", type=str, help="Distractors to inject"
 )
 parser.add_argument(
     "--model-name",
@@ -42,17 +38,11 @@ parser.add_argument(
     help="Model to evalute --- see models.py for an overview of supported models",
 )
 parser.add_argument(
-    "--question-types",
+    "--question-formats",
     default=["ab"],
     type=str,
     help="Question Templates to evaluate",
     nargs="+",
-)
-parser.add_argument(
-    "--eval-technique",
-    default="top_p_sampling",
-    type=str,
-    help="Evaluation Technique (top_p_sampling is only supported technique right now)",
 )
 parser.add_argument(
     "--eval-top-p", default=1.0, type=float, help="Top-P parameter for top-p sampling"
@@ -67,10 +57,42 @@ parser.add_argument(
     help="Max. number of tokens per completion",
 )
 parser.add_argument(
-    "--eval-nb-samples", default=1, type=int, help="Nb. of samples per question form"
+    "--eval-num-samples", default=1, type=int, help="Num. of samples per question form"
+)
+parser.add_argument(
+    "--eval-num-scenarios", default=-1, type=int, help="Num. of scenarios to evaluate"
 )
 
 args = parser.parse_args()
+
+
+################################################################################################
+# PROMPTER CREATOR
+################################################################################################
+DATASETS= {
+    "moralchoice_high_ambiguity": {
+        "prompter_class": "MoralChoicePrompter"
+    },
+    "moralchoice_low_ambiguity": {
+        "prompter_class": "MoralChoicePrompter"
+    },
+    "reddit": {
+        "prompter_class": "RedditPrompter"
+    }
+}
+
+MoralChoicePrompter = MoralChoicePrompter
+RedditPrompter = RedditPrompter
+
+def create_prompter(dataset_name, model, max_tokens, temperature, top_p):
+    """Init Models from model_name only"""
+    if dataset_name in DATASETS:
+        class_name = DATASETS[dataset_name]["prompter_class"]
+        cls = getattr(sys.modules[__name__], class_name)
+        return cls(model, max_tokens, temperature, top_p)
+
+    raise ValueError(f"Unknown Dataset '{dataset_name}'")
+
 
 ################################################################################################
 # SETUP
@@ -78,20 +100,20 @@ args = parser.parse_args()
 
 # Load scenarios
 scenarios = pd.read_csv(f"data/scenarios/{args.dataset}.csv")
+scenarios = scenarios[:args.eval_num_scenarios] if args.eval_num_scenarios > 0 else scenarios
+# TODO: add support for reddit dataset
 
-# Load refusals and common answer patterns
-with open(f"{PATH_RESPONSE_TEMPLATES}/refusals.txt", encoding="utf-8") as f:
-    refusals = f.read().splitlines()
-
-response_patterns = {}
-for question_type in args.question_types:
-    with open(f"{PATH_RESPONSE_TEMPLATES}/{question_type}.json", encoding="utf-8") as f:
-        response_patterns[question_type] = json.load(f)
+if args.distractors == "image":
+    distractors = pd.read_csv(f"data/distractors/image.csv")
+elif args.distractors == "text":
+    distractors = pd.read_csv(f"data/distractors/text.csv")
+else:
+    distractors = None
 
 # Creates result folders
 path_model = f"{PATH_RESULTS}/{args.experiment_name}/{args.dataset}_raw/{args.model_name.split('/')[-1]}"
-for question_type in args.question_types:
-    path_model_questiontype = path_model + f"/{question_type}"
+for question_format in args.question_formats:
+    path_model_questiontype = path_model + f"/{question_format}"
     if not os.path.exists(path_model_questiontype):
         os.makedirs(path_model_questiontype)
 
@@ -100,8 +122,9 @@ for question_type in args.question_types:
 # RUN EVALUATION
 ################################################################################################
 model = create_model(args.model_name)
+prompter = create_prompter(args.dataset, model, args.eval_max_tokens, args.eval_temp, args.eval_top_p)
 
-for k, (identifier, scenario) in tqdm(
+for i, (id, scenario) in tqdm(
     enumerate(scenarios.iterrows()),
     total=len(scenarios),
     position=0,
@@ -109,60 +132,30 @@ for k, (identifier, scenario) in tqdm(
     leave=True,
     desc=f"MoralChoice Eval: {model.get_model_id()}",
 ):
-    for question_type in args.question_types:
-        results = []
-
-        for question_ordering in [0, 1]:
-            # Get question form
-            question_form, action_mapping = get_question_form(
-                scenario=scenario,
-                question_type=question_type,
-                question_ordering=question_ordering,
-                system_instruction=True,
+    for question_format in args.question_formats:
+        if distractors is None:
+            # No distractor condition
+            results = prompter.prompt(
+                question_format=question_format,
+                scenario_series=scenario,
+                distractor_series =None
             )
 
-            # Set result base dict
-            result_base = {
-                "scenario_id": scenario["scenario_id"],
-                "distractor_id": scenario["distractor_id"],
-                "model_id": model.get_model_id(),
-                "question_type": question_type,
-                "question_ordering": question_ordering,
-                "question_header": question_form["question_header"],
-                "question_text": question_form["question"],
-                "eval_technique": args.eval_technique,
-                "eval_top_p": args.eval_top_p,
-                "eval_temperature": args.eval_temp,
-            }
-
-            for nb_query in range(args.eval_nb_samples):
-                result_base["eval_sample_nb"] = nb_query
-
-                # Query model
-                response = model.get_top_p_answer(
-                    prompt_base=question_form["question"],
-                    prompt_system=question_form["question_header"],
-                    max_tokens=1,
-                    temperature=args.eval_temp,
-                    top_p=args.eval_top_p,
+            with open(
+                    f'{path_model}/{question_format}/scenario_{scenario["id"]}_{i}.pickle',
+                    "wb",
+            ) as f:
+                pickle.dump(pd.DataFrame(results), f, protocol=0)
+        else:
+            for id, distractor in distractors.iterrows():
+                results = prompter.prompt(
+                    question_format=question_format,
+                    scenario_series=scenario,
+                    distractor_series = distractor
                 )
 
-                # Match response (token sequence) to actions
-                response["decision"] = token_to_action_matching(
-                    response["answer"],
-                    scenario,
-                    response_patterns,
-                    question_type,
-                    action_mapping,
-                    refusals,
-                )
-
-                # Log Results
-                result = {**result_base, **response}
-                results.append(result)
-
-        with open(
-            f'{path_model}/{question_type}/scenario_{scenario["scenario_id"]}_{scenario["distractor_id"]}.pickle',
-            "wb",
-        ) as f:
-            pickle.dump(pd.DataFrame(results), f, protocol=0)
+                with open(
+                    f'{path_model}/{question_format}/scenario_{scenario["id"]}_{i}.pickle',
+                    "wb",
+                ) as f:
+                    pickle.dump(pd.DataFrame(results), f, protocol=0)
